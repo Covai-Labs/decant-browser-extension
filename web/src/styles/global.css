@@ -124,15 +124,10 @@ a {
 }
 
 .brand-mark {
-  display: grid;
+  display: block;
   width: 32px;
   height: 32px;
-  place-items: center;
-  border-radius: 50% 50% 45% 45%;
-  background: var(--wine);
-  color: var(--on-wine);
-  font-family: Georgia, serif;
-  font-size: 1.15rem;
+  border-radius: 8px;
   box-shadow: 0 4px 14px var(--accent-glow);
 }
 
