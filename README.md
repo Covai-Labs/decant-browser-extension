@@ -50,11 +50,11 @@ Key differentiators:
 
 ## Quick Install
 
-- **Chrome / Brave / Edge:** [Add to Chrome](https://chromewebstore.google.com) (keyword: _Decant — Privacy-First Web Clipper_) or load the unpacked build (`.output/chrome-mv3`).
-- **Firefox:** Load the temporary add-on from `.output/firefox-mv3/manifest.json` at `about:debugging#/runtime/this-firefox`.
+- **Chrome / Brave / Edge:** [Add to Chrome](https://chromewebstore.google.com/detail/decant-web-to-markdown-cl/gaedmbipeogpcddnoedpmjcemgcoboaa) or load the unpacked build (`.output/chrome-mv3`).
+- **Firefox:** [Get it for Firefox](https://addons.mozilla.org/en-US/firefox/addon/decant/) or load the temporary add-on from `.output/firefox-mv3/manifest.json` at `about:debugging#/runtime/this-firefox`.
 
 > [!NOTE]
-> Store listings are rolling out; if the store build isn't available in your region yet, the unpacked builds below work identically.
+> Store listings are live; if the store build isn't available in your region yet, the unpacked builds below work identically.
 
 <details>
 <summary><b>📦 Manual / Unpacked Installation</b></summary>
