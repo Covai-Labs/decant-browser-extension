@@ -163,16 +163,11 @@
         display: inline-flex;
       }
       .brand-mark {
-        background: var(--wine);
         width: 32px;
         height: 32px;
-        color: var(--on-wine);
         box-shadow: 0 4px 14px var(--accent-glow);
-        border-radius: 50% 50% 45% 45%;
-        place-items: center;
-        font-family: Georgia, serif;
-        font-size: 1.15rem;
-        display: grid;
+        border-radius: 8px;
+        display: block;
       }
       .brand:hover .brand-mark {
         box-shadow: 0 4px 20px var(--accent-glow);
@@ -871,7 +866,10 @@
     </script>
     <header class="site-header">
       <a href="/index.html" class="brand" aria-label="Decant home"
-        ><span class="brand-mark">D</span><span class="brand-name">Decant</span></a
+        ><img class="brand-mark" src="/icons/icon32.png" alt="" width="32" height="32" /><span
+          class="brand-name"
+          >Decant</span
+        ></a
       >
       <div class="header-right">
         <nav aria-label="Main navigation">
