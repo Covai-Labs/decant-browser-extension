@@ -2,6 +2,7 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
+import { SITE } from '../data/site';
 ---
 
 <BaseLayout
@@ -27,8 +28,15 @@ import Footer from '../components/Footer.astro';
         <div>
           <h2>Install the extension</h2>
           <p>
-            Build Decant from the open-source repository or grab it from the browser store when it
-            lands. Pin it to your toolbar for easy access.
+            Grab it from the
+            <a href={SITE.chromeStore} target="_blank" rel="noopener noreferrer">
+              Chrome Web Store
+            </a>
+            or
+            <a href={SITE.firefoxAddons} target="_blank" rel="noopener noreferrer">
+              Firefox Add-ons
+            </a>
+            — or build it from the open-source repository. Pin it to your toolbar for easy access.
           </p>
         </div>
       </li>

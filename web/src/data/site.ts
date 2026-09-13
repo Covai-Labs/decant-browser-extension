@@ -4,8 +4,9 @@ export const SITE = {
   name: 'Decant',
   url: 'https://decant.covai.org',
   github: 'https://github.com/Covai-Labs/decant',
-  chromeStore: '#',
-  firefoxAddons: '#',
+  chromeStore:
+    'https://chromewebstore.google.com/detail/decant-web-to-markdown-cl/gaedmbipeogpcddnoedpmjcemgcoboaa',
+  firefoxAddons: 'https://addons.mozilla.org/en-US/firefox/addon/decant/',
 };
 
 export function softwareApplicationJsonLd() {
