@@ -3,22 +3,31 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Feedback and issues — Decant</title>
-    <meta name="description" content="Send feedback or report an issue with Decant." />
-    <link rel="canonical" href="https://decant.covai.org/feedback.html" />
+    <title>Release notes — Decant</title>
+    <meta
+      name="description"
+      content="Every Decant release, newest first. Notes are generated from GitHub Releases and rendered here."
+    />
+    <link rel="canonical" href="https://decant.covai.org/release-notes.html" />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://decant.covai.org/feedback.html" />
-    <meta property="og:title" content="Feedback and issues — Decant" />
-    <meta property="og:description" content="Send feedback or report an issue with Decant." />
+    <meta property="og:url" content="https://decant.covai.org/release-notes.html" />
+    <meta property="og:title" content="Release notes — Decant" />
+    <meta
+      property="og:description"
+      content="Every Decant release, newest first. Notes are generated from GitHub Releases and rendered here."
+    />
     <meta property="og:image" content="https://decant.covai.org/og-image.png" />
     <meta property="og:image:width" content="1280" />
     <meta property="og:image:height" content="640" />
     <meta property="og:site_name" content="Decant" />
     <meta property="og:locale" content="en_US" />
     <meta name="twitter:card" content="summary_large_image" />
-    <meta name="twitter:url" content="https://decant.covai.org/feedback.html" />
-    <meta name="twitter:title" content="Feedback and issues — Decant" />
-    <meta name="twitter:description" content="Send feedback or report an issue with Decant." />
+    <meta name="twitter:url" content="https://decant.covai.org/release-notes.html" />
+    <meta name="twitter:title" content="Release notes — Decant" />
+    <meta
+      name="twitter:description"
+      content="Every Decant release, newest first. Notes are generated from GitHub Releases and rendered here."
+    />
     <meta name="twitter:image" content="https://decant.covai.org/og-image.png" />
     <!-- Theme bootstrap (pre-paint — prevents flash) -->
     <script>
@@ -731,6 +740,78 @@
         z-index: 1;
         position: relative;
       }
+      .release-notes[data-astro-cid-kvvzjfuj] .release[data-astro-cid-kvvzjfuj] {
+        border-top: 1px solid var(--line);
+        margin-top: 44px;
+        padding-top: 26px;
+      }
+      .release-notes[data-astro-cid-kvvzjfuj] .release-meta[data-astro-cid-kvvzjfuj] {
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 12px;
+        display: flex;
+      }
+      .release-notes[data-astro-cid-kvvzjfuj]
+        .release-meta[data-astro-cid-kvvzjfuj]
+        h2[data-astro-cid-kvvzjfuj] {
+        margin: 0;
+        font-size: clamp(1.4rem, 3vw, 2rem);
+      }
+      .release-notes[data-astro-cid-kvvzjfuj] .release-date[data-astro-cid-kvvzjfuj] {
+        color: var(--text-muted);
+        font:
+          0.8rem JetBrains Mono,
+          monospace;
+      }
+      .release-notes[data-astro-cid-kvvzjfuj]
+        .release-body[data-astro-cid-kvvzjfuj]
+        ul[data-astro-cid-kvvzjfuj] {
+        margin: 12px 0 0;
+        padding-left: 24px;
+        list-style: outside;
+      }
+      .release-notes[data-astro-cid-kvvzjfuj]
+        .release-body[data-astro-cid-kvvzjfuj]
+        li[data-astro-cid-kvvzjfuj] {
+        color: var(--text-muted);
+        margin-bottom: 8px;
+        font-size: 0.95rem;
+      }
+      .release-notes[data-astro-cid-kvvzjfuj]
+        .release-body[data-astro-cid-kvvzjfuj]
+        li[data-astro-cid-kvvzjfuj]
+        strong[data-astro-cid-kvvzjfuj] {
+        color: var(--text-primary);
+      }
+      .release-notes[data-astro-cid-kvvzjfuj]
+        .release-body[data-astro-cid-kvvzjfuj]
+        a[data-astro-cid-kvvzjfuj] {
+        color: var(--wine);
+        font-weight: 600;
+      }
+      .release-notes[data-astro-cid-kvvzjfuj]
+        .release-body[data-astro-cid-kvvzjfuj]
+        code[data-astro-cid-kvvzjfuj] {
+        background: var(--bg-secondary);
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 1px 6px;
+        font:
+          0.82rem JetBrains Mono,
+          monospace;
+      }
+      .release-notes[data-astro-cid-kvvzjfuj]
+        .release-body[data-astro-cid-kvvzjfuj]
+        p[data-astro-cid-kvvzjfuj] {
+        color: var(--text-muted);
+        font-size: 0.95rem;
+      }
+      .release-notes[data-astro-cid-kvvzjfuj]
+        .release-body[data-astro-cid-kvvzjfuj]
+        h3[data-astro-cid-kvvzjfuj] {
+        margin-top: 24px;
+        font-size: 1.05rem;
+      }
     </style>
   </head>
   <body>
@@ -994,27 +1075,46 @@
         </script>
       </div>
     </header>
-    <main class="reading-page shell">
-      <p class="eyebrow">Feedback</p>
-      <h1>Help us make<br /><em>the pour smoother.</em></h1>
-      <p class="lede">
-        Found a page Decant struggles with? Have an idea for a better workflow? Open an issue or
-        start a discussion on GitHub.
+    <main class="reading-page shell release-notes" data-astro-cid-kvvzjfuj>
+      <p class="eyebrow" data-astro-cid-kvvzjfuj>Changelog</p>
+      <h1 data-astro-cid-kvvzjfuj>
+        Release notes.<br data-astro-cid-kvvzjfuj /><em data-astro-cid-kvvzjfuj
+          >Fresh from GitHub.</em
+        >
+      </h1>
+      <p class="lede" data-astro-cid-kvvzjfuj>
+        Every published Decant version, newest first — fetched live from<a
+          href="https://github.com/Covai-Labs/decant/releases"
+          target="_blank"
+          rel="noopener noreferrer"
+          data-astro-cid-kvvzjfuj
+          >GitHub Releases</a
+        >, so this page is never stale.
       </p>
-      <a
-        class="button button-primary"
-        href="https://github.com/Covai-Labs/decant/issues/new/choose"
-        target="_blank"
-        rel="noopener noreferrer"
-        >Report an issue <span>↗</span></a
-      >
-      <div class="callout">
-        <strong>When reporting an extraction issue</strong>
-        <p>
-          Include the public URL or site type, browser, and what content was missing. Please do not
-          include private pages or sensitive data.
-        </p>
+      <div id="release-list" aria-live="polite" data-astro-cid-kvvzjfuj>
+        <div class="callout" data-astro-cid-kvvzjfuj>
+          <p data-astro-cid-kvvzjfuj>
+            Loading release notes… if they don’t appear, see them directly on<a
+              href="https://github.com/Covai-Labs/decant/releases"
+              target="_blank"
+              rel="noopener noreferrer"
+              data-astro-cid-kvvzjfuj
+              >GitHub Releases</a
+            >.
+          </p>
+        </div>
       </div>
+      <noscript
+        ><div class="callout" data-astro-cid-kvvzjfuj>
+          <p data-astro-cid-kvvzjfuj>
+            Release notes need JavaScript to load from GitHub. Browse them on<a
+              href="https://github.com/Covai-Labs/decant/releases"
+              data-astro-cid-kvvzjfuj
+              >GitHub Releases</a
+            >.
+          </p>
+        </div></noscript
+      >
     </main>
     <footer class="site-footer">
       <div class="footer-links">
@@ -1045,3 +1145,139 @@
     </footer>
   </body>
 </html>
+<script data-repo="Covai-Labs/decant">
+  // Client-side release notes: fetched live from the GitHub Releases API so
+  // the page stays current without a site rebuild. Keep the Markdown subset
+  // renderer in sync with web-docs/src/utils/markdown.ts in decant-core.
+  (function () {
+    var container = document.getElementById('release-list');
+    if (!container) return;
+    var repo = document.currentScript.dataset.repo;
+    var fallback =
+      '<div class="callout"><p>Could not load release notes right now. See them on ' +
+      '<a href="https://github.com/' +
+      repo +
+      '/releases" target="_blank" rel="noopener noreferrer">GitHub Releases</a>.</p></div>';
+
+    function escapeHtml(s) {
+      return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderInline(s) {
+      var out = escapeHtml(s);
+      out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      out = out.replace(
+        /\[([^\]]+)\]\((https?:[^)\s]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+      );
+      out = out.replace(
+        /(^|[\s(>])(https?:\/\/[^\s<)]+)/g,
+        '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>',
+      );
+      return out;
+    }
+
+    function renderMarkdown(src) {
+      var lines = src.replace(/\r\n/g, '\n').split('\n');
+      var html = '';
+      var inList = false;
+      var inCode = false;
+      function closeList() {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+        }
+      }
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (line.indexOf('```') === 0) {
+          closeList();
+          html += inCode ? '</code></pre>' : '<pre><code>';
+          inCode = !inCode;
+          continue;
+        }
+        if (inCode) {
+          html += escapeHtml(lines[i]) + '\n';
+          continue;
+        }
+        if (line.indexOf('### ') === 0) {
+          closeList();
+          html += '<h3>' + renderInline(line.slice(4)) + '</h3>';
+        } else if (line.indexOf('## ') === 0) {
+          closeList();
+          html += '<h3>' + renderInline(line.slice(3)) + '</h3>';
+        } else if (line.indexOf('* ') === 0 || line.indexOf('- ') === 0) {
+          if (!inList) {
+            html += '<ul>';
+            inList = true;
+          }
+          html += '<li>' + renderInline(line.slice(2)) + '</li>';
+        } else if (line === '' || line === '---') {
+          closeList();
+        } else if (line.indexOf('# ') === 0) {
+          closeList();
+          html += '<h3>' + renderInline(line.slice(2)) + '</h3>';
+        } else {
+          closeList();
+          html += '<p>' + renderInline(line) + '</p>';
+        }
+      }
+      closeList();
+      if (inCode) html += '</code></pre>';
+      return html;
+    }
+
+    function fmtDate(iso) {
+      try {
+        return new Date(iso).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+      } catch (e) {
+        return iso.slice(0, 10);
+      }
+    }
+
+    fetch('https://api.github.com/repos/' + repo + '/releases?per_page=30', {
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (releases) {
+        var live = releases.filter(function (r) {
+          return !r.draft;
+        });
+        if (!live.length) {
+          container.innerHTML = fallback;
+          return;
+        }
+        container.innerHTML = live
+          .map(function (r) {
+            var badge = r.prerelease ? ' <span class="release-date">pre-release</span>' : '';
+            return (
+              '<article class="release"><div class="release-meta"><h2>' +
+              escapeHtml(r.tag_name) +
+              '</h2><span class="release-date">' +
+              escapeHtml(fmtDate(r.published_at || r.created_at || '')) +
+              '</span>' +
+              badge +
+              '</div><div class="release-body">' +
+              renderMarkdown(r.body || '_No notes for this release._') +
+              '</div></article>'
+            );
+          })
+          .join('');
+      })
+      .catch(function () {
+        container.innerHTML = fallback;
+      });
+  })();
+</script>
