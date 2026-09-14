@@ -740,58 +740,45 @@
         z-index: 1;
         position: relative;
       }
-      .release-notes[data-astro-cid-kvvzjfuj] .release[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release {
         border-top: 1px solid var(--line);
         margin-top: 44px;
         padding-top: 26px;
       }
-      .release-notes[data-astro-cid-kvvzjfuj] .release-meta[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-meta {
         flex-wrap: wrap;
         align-items: baseline;
         gap: 12px;
         display: flex;
       }
-      .release-notes[data-astro-cid-kvvzjfuj]
-        .release-meta[data-astro-cid-kvvzjfuj]
-        h2[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-meta h2 {
         margin: 0;
         font-size: clamp(1.4rem, 3vw, 2rem);
       }
-      .release-notes[data-astro-cid-kvvzjfuj] .release-date[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-date {
         color: var(--text-muted);
         font:
           0.8rem JetBrains Mono,
           monospace;
       }
-      .release-notes[data-astro-cid-kvvzjfuj]
-        .release-body[data-astro-cid-kvvzjfuj]
-        ul[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-body ul {
         margin: 12px 0 0;
         padding-left: 24px;
         list-style: outside;
       }
-      .release-notes[data-astro-cid-kvvzjfuj]
-        .release-body[data-astro-cid-kvvzjfuj]
-        li[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-body li {
         color: var(--text-muted);
         margin-bottom: 8px;
         font-size: 0.95rem;
       }
-      .release-notes[data-astro-cid-kvvzjfuj]
-        .release-body[data-astro-cid-kvvzjfuj]
-        li[data-astro-cid-kvvzjfuj]
-        strong[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-body li strong {
         color: var(--text-primary);
       }
-      .release-notes[data-astro-cid-kvvzjfuj]
-        .release-body[data-astro-cid-kvvzjfuj]
-        a[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-body a {
         color: var(--wine);
         font-weight: 600;
       }
-      .release-notes[data-astro-cid-kvvzjfuj]
-        .release-body[data-astro-cid-kvvzjfuj]
-        code[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-body code {
         background: var(--bg-secondary);
         border: 1px solid var(--line);
         border-radius: 6px;
@@ -800,15 +787,11 @@
           0.82rem JetBrains Mono,
           monospace;
       }
-      .release-notes[data-astro-cid-kvvzjfuj]
-        .release-body[data-astro-cid-kvvzjfuj]
-        p[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-body p {
         color: var(--text-muted);
         font-size: 0.95rem;
       }
-      .release-notes[data-astro-cid-kvvzjfuj]
-        .release-body[data-astro-cid-kvvzjfuj]
-        h3[data-astro-cid-kvvzjfuj] {
+      .release-notes[data-astro-cid-kvvzjfuj] .release-body h3 {
         margin-top: 24px;
         font-size: 1.05rem;
       }
@@ -1083,7 +1066,8 @@
         >
       </h1>
       <p class="lede" data-astro-cid-kvvzjfuj>
-        Every published Decant version, newest first — fetched live from<a
+        Every published Decant version, newest first — fetched live from
+        <a
           href="https://github.com/Covai-Labs/decant/releases"
           target="_blank"
           rel="noopener noreferrer"
@@ -1244,13 +1228,22 @@
       }
     }
 
-    fetch('https://api.github.com/repos/' + repo + '/releases?per_page=30', {
-      headers: { Accept: 'application/vnd.github+json' },
-    })
-      .then(function (res) {
+    // Follow GitHub's Link header so repos with 100+ releases still list all.
+    var releases = [];
+    function fetchPage(url) {
+      return fetch(url, {
+        headers: { Accept: 'application/vnd.github+json' },
+      }).then(function (res) {
         if (!res.ok) throw new Error('HTTP ' + res.status);
-        return res.json();
-      })
+        var next = (res.headers.get('Link') || '').match(/<([^>]+)>;\s*rel="next"/);
+        return res.json().then(function (page) {
+          releases = releases.concat(page);
+          return next ? fetchPage(next[1]) : releases;
+        });
+      });
+    }
+
+    fetchPage('https://api.github.com/repos/' + repo + '/releases?per_page=100')
       .then(function (releases) {
         var live = releases.filter(function (r) {
           return !r.draft;
@@ -1270,7 +1263,7 @@
               '</span>' +
               badge +
               '</div><div class="release-body">' +
-              renderMarkdown(r.body || '_No notes for this release._') +
+              renderMarkdown(r.body || 'No notes for this release.') +
               '</div></article>'
             );
           })
