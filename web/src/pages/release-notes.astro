@@ -1,0 +1,261 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<BaseLayout
+  title="Release notes — Decant"
+  description="Every Decant release, newest first. Notes are generated from GitHub Releases and rendered here."
+  canonicalPath="/release-notes.html"
+>
+  <Header />
+  <main class="reading-page shell release-notes">
+    <p class="eyebrow">Changelog</p>
+    <h1>
+      Release notes.
+      <br />
+      <em>Fresh from GitHub.</em>
+    </h1>
+    <p class="lede">
+      Every published Decant version, newest first — fetched live from
+      <a
+        href="https://github.com/Covai-Labs/decant/releases"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        GitHub Releases
+      </a>
+      , so this page is never stale.
+    </p>
+    <div id="release-list" aria-live="polite">
+      <div class="callout">
+        <p>
+          Loading release notes… if they don’t appear, see them directly on
+          <a
+            href="https://github.com/Covai-Labs/decant/releases"
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            GitHub Releases
+          </a>
+          .
+        </p>
+      </div>
+    </div>
+    <noscript>
+      <div class="callout">
+        <p>
+          Release notes need JavaScript to load from GitHub. Browse them on
+          <a href="https://github.com/Covai-Labs/decant/releases">GitHub Releases</a>.
+        </p>
+      </div>
+    </noscript>
+  </main>
+  <Footer />
+</BaseLayout>
+
+<style>
+  .release-notes .release {
+    margin-top: 44px;
+    padding-top: 26px;
+    border-top: 1px solid var(--line);
+  }
+
+  .release-notes .release-meta {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  .release-notes .release-meta h2 {
+    margin: 0;
+    font-size: clamp(1.4rem, 3vw, 2rem);
+  }
+
+  .release-notes .release-date {
+    color: var(--text-muted);
+    font:
+      0.8rem 'JetBrains Mono',
+      monospace;
+  }
+
+  .release-notes .release-body ul {
+    list-style: disc;
+    padding-left: 24px;
+    margin: 12px 0 0;
+  }
+
+  .release-notes .release-body li {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+    margin-bottom: 8px;
+  }
+
+  .release-notes .release-body li strong {
+    color: var(--text-primary);
+  }
+
+  .release-notes .release-body a {
+    color: var(--wine);
+    font-weight: 600;
+  }
+
+  .release-notes .release-body code {
+    font:
+      0.82rem 'JetBrains Mono',
+      monospace;
+    background: var(--bg-secondary);
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    padding: 1px 6px;
+  }
+
+  .release-notes .release-body p {
+    color: var(--text-muted);
+    font-size: 0.95rem;
+  }
+
+  .release-notes .release-body h3 {
+    margin-top: 24px;
+    font-size: 1.05rem;
+  }
+</style>
+
+<script is:inline data-repo="Covai-Labs/decant">
+  // Client-side release notes: fetched live from the GitHub Releases API so
+  // the page stays current without a site rebuild. Keep the Markdown subset
+  // renderer in sync with web-docs/src/utils/markdown.ts in decant-core.
+  (function () {
+    var container = document.getElementById('release-list');
+    if (!container) return;
+    var repo = document.currentScript.dataset.repo;
+    var fallback =
+      '<div class="callout"><p>Could not load release notes right now. See them on ' +
+      '<a href="https://github.com/' +
+      repo +
+      '/releases" target="_blank" rel="noopener noreferrer">GitHub Releases</a>.</p></div>';
+
+    function escapeHtml(s) {
+      return s
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function renderInline(s) {
+      var out = escapeHtml(s);
+      out = out.replace(/`([^`]+)`/g, '<code>$1</code>');
+      out = out.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+      out = out.replace(
+        /\[([^\]]+)\]\((https?:[^)\s]+)\)/g,
+        '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>',
+      );
+      out = out.replace(
+        /(^|[\s(>])(https?:\/\/[^\s<)]+)/g,
+        '$1<a href="$2" target="_blank" rel="noopener noreferrer">$2</a>',
+      );
+      return out;
+    }
+
+    function renderMarkdown(src) {
+      var lines = src.replace(/\r\n/g, '\n').split('\n');
+      var html = '';
+      var inList = false;
+      var inCode = false;
+      function closeList() {
+        if (inList) {
+          html += '</ul>';
+          inList = false;
+        }
+      }
+      for (var i = 0; i < lines.length; i++) {
+        var line = lines[i].trim();
+        if (line.indexOf('```') === 0) {
+          closeList();
+          html += inCode ? '</code></pre>' : '<pre><code>';
+          inCode = !inCode;
+          continue;
+        }
+        if (inCode) {
+          html += escapeHtml(lines[i]) + '\n';
+          continue;
+        }
+        if (line.indexOf('### ') === 0) {
+          closeList();
+          html += '<h3>' + renderInline(line.slice(4)) + '</h3>';
+        } else if (line.indexOf('## ') === 0) {
+          closeList();
+          html += '<h3>' + renderInline(line.slice(3)) + '</h3>';
+        } else if (line.indexOf('* ') === 0 || line.indexOf('- ') === 0) {
+          if (!inList) {
+            html += '<ul>';
+            inList = true;
+          }
+          html += '<li>' + renderInline(line.slice(2)) + '</li>';
+        } else if (line === '' || line === '---') {
+          closeList();
+        } else if (line.indexOf('# ') === 0) {
+          closeList();
+          html += '<h3>' + renderInline(line.slice(2)) + '</h3>';
+        } else {
+          closeList();
+          html += '<p>' + renderInline(line) + '</p>';
+        }
+      }
+      closeList();
+      if (inCode) html += '</code></pre>';
+      return html;
+    }
+
+    function fmtDate(iso) {
+      try {
+        return new Date(iso).toLocaleDateString('en-US', {
+          year: 'numeric',
+          month: 'short',
+          day: 'numeric',
+        });
+      } catch (e) {
+        return iso.slice(0, 10);
+      }
+    }
+
+    fetch('https://api.github.com/repos/' + repo + '/releases?per_page=30', {
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+      .then(function (res) {
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        return res.json();
+      })
+      .then(function (releases) {
+        var live = releases.filter(function (r) {
+          return !r.draft;
+        });
+        if (!live.length) {
+          container.innerHTML = fallback;
+          return;
+        }
+        container.innerHTML = live
+          .map(function (r) {
+            var badge = r.prerelease ? ' <span class="release-date">pre-release</span>' : '';
+            return (
+              '<article class="release"><div class="release-meta"><h2>' +
+              escapeHtml(r.tag_name) +
+              '</h2><span class="release-date">' +
+              escapeHtml(fmtDate(r.published_at || r.created_at || '')) +
+              '</span>' +
+              badge +
+              '</div><div class="release-body">' +
+              renderMarkdown(r.body || '_No notes for this release._') +
+              '</div></article>'
+            );
+          })
+          .join('');
+      })
+      .catch(function () {
+        container.innerHTML = fallback;
+      });
+  })();
+</script>
