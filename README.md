@@ -111,4 +111,8 @@ Bug reports, feature ideas, and code contributions are welcome. See
 
 This project is licensed under the **GNU Affero General Public License v3.0 (AGPL-3.0)**. See [LICENSE](LICENSE) for details.
 
+### Test Fixtures Notice
+
+Sample fixtures located in [`tests/fixtures/`](tests/fixtures/) are retained solely for automated regression testing and extraction verification under fair use principles. They are excluded from the project's AGPL-3.0 license. See [`tests/fixtures/README.md`](tests/fixtures/README.md) for details.
+
 Acknowledgments: [decant-core](https://github.com/Covai-Labs/decant-core) — shared parsing engine; Mozilla Readability; Turndown + GFM; JSZip; WXT.
