@@ -7,7 +7,13 @@ import {
   convertToMarkdown,
 } from 'decant-core';
 import { DEFAULT_OPTIONS } from '../src/shared/storage.js';
-import { formatMarkdown, sanitizeFilename } from '../src/shared/formatter.js';
+import { formatMarkdown, sanitizeFilename, normalizeLatexMath } from '../src/shared/formatter.js';
+import { pollTransferInject } from '../src/shared/transfer/injector.js';
+import {
+  loadTransferRecord,
+  loadTransferRecordByKey,
+  clearTransferRecord,
+} from '../src/shared/transfer/records.js';
 import { logger } from '../src/shared/logger.js';
 
 async function extractAiChat(options = DEFAULT_OPTIONS) {
@@ -28,10 +34,23 @@ async function extractAiChat(options = DEFAULT_OPTIONS) {
     const mdBody = (result.messages || [])
       .map((m) => {
         const role = m.role === 'user' ? 'User' : 'Assistant';
-        const content = typeof m.content === 'string' ? m.content.trim() : '';
+        const content = typeof m.content === 'string' ? normalizeLatexMath(m.content.trim()) : '';
         return `**${role}:**\n\n${content}`;
       })
       .join('\n\n---\n\n');
+
+    const htmlCards = (result.messages || [])
+      .map((m) => {
+        const role = m.role === 'user' ? 'User' : 'Assistant';
+        const content = typeof m.content === 'string' ? normalizeLatexMath(m.content.trim()) : '';
+        const escaped = content.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        const paragraphs = escaped
+          .split(/\n\n+/)
+          .map((p) => `<p>${p.replace(/\n/g, '<br/>')}</p>`)
+          .join('\n');
+        return `<section class="chat-turn chat-${role.toLowerCase()}"><h2>${role}</h2>${paragraphs}</section>`;
+      })
+      .join('\n<hr/>\n');
 
     const parsedArticle = {
       title: result.title || `${platform} Chat`,
@@ -42,7 +61,7 @@ async function extractAiChat(options = DEFAULT_OPTIONS) {
       publishedTime: '',
       url: window.location.href,
       content: mdBody,
-      htmlContent: '',
+      htmlContent: htmlCards,
     };
 
     const formattedMarkdown = formatMarkdown(parsedArticle, options);
@@ -129,79 +148,50 @@ export async function extractArticle(options = DEFAULT_OPTIONS) {
   };
 }
 
-export async function checkAndInjectContinuation() {
+export async function checkAndInjectContinuation(nudgeKey) {
   try {
     const { browser } = await import('wxt/browser');
     if (!browser.storage || !browser.storage.local) return;
-    const res = await browser.storage.local.get('pendingContinuation');
-    const data = res?.pendingContinuation;
-    if (!data || !data.payload) return;
+    const recordInfo = nudgeKey
+      ? await loadTransferRecordByKey(browser.storage.local, nudgeKey, window.location)
+      : await loadTransferRecord(browser.storage.local, window.location);
+    if (!recordInfo || !recordInfo.payload) return;
 
-    // Expire pending continuation after 5 minutes
-    if (Date.now() - (data.timestamp || 0) > 300000) {
-      await browser.storage.local.remove('pendingContinuation');
-      return;
-    }
-
-    const inputSelectors = [
-      '#prompt-textarea',
-      'div[contenteditable="true"]',
-      'textarea',
-      '.user-prompt textarea',
-      'ms-prompt-editor textarea',
-      'rich-textarea div[contenteditable="true"]',
-    ];
-
-    const maxAttempts = 20; // poll every 300ms up to 6s
-    let attempts = 0;
-
-    const timer = setInterval(async () => {
-      attempts++;
-      let inputEl = null;
-
-      for (const sel of inputSelectors) {
-        inputEl = document.querySelector(sel);
-        if (inputEl) break;
-      }
-
-      if (inputEl) {
-        clearInterval(timer);
-        try {
-          inputEl.focus();
-
-          if (inputEl.tagName === 'TEXTAREA' || inputEl.tagName === 'INPUT') {
-            inputEl.value = data.payload;
-            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-            inputEl.dispatchEvent(new Event('change', { bubbles: true }));
-          } else {
-            // contenteditable element
-            let inserted = false;
-            try {
-              inserted = document.execCommand('insertText', false, data.payload);
-            } catch {
-              inserted = false;
-            }
-
-            if (!inserted || !inputEl.textContent || inputEl.textContent.trim().length === 0) {
-              inputEl.textContent = data.payload;
-            }
-            inputEl.dispatchEvent(new Event('input', { bubbles: true }));
-            inputEl.dispatchEvent(new Event('change', { bubbles: true }));
-          }
-
-          await browser.storage.local.remove('pendingContinuation');
-          logger.info('ContentScript', 'Auto-injected decanted prompt into AI chat input.');
-        } catch (err) {
-          logger.error('ContentScript', 'Error populating input element:', err);
+    const { keys, record, payload } = recordInfo;
+    const env = {
+      document,
+      isTopFrame: window.top === window,
+      clipboardWrite: async (text) => {
+        if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+          throw new Error('Clipboard API unavailable.');
         }
-      } else if (attempts >= maxAttempts) {
-        clearInterval(timer);
-        logger.warn(
-          'ContentScript',
-          'Could not locate AI chat prompt input element after max attempts.',
-        );
-      }
-    }, 300);
+        await navigator.clipboard.writeText(text);
+      },
+    };
+
+    const result = await pollTransferInject(
+      env,
+      {
+        payload,
+        targetPlatform: record.targetPlatform,
+        autoSend: record.autoSend !== false,
+      },
+      { maxWaitMs: 15000, pollMs: 500 },
+    );
+
+    if (result.ok) {
+      await clearTransferRecord(browser.storage.local, keys);
+      logger.info('ContentScript', 'Successfully injected transfer prompt into AI chat.');
+      showDecantToast(
+        result.autoSent ? 'Decanted & prompt submitted!' : 'Decanted & prompt populated!',
+      );
+    } else if (result.reason === 'blocked') {
+      showDecantToast(
+        result.clipboardBackup
+          ? 'Notice: dialog blocking prompt entry. Copied to clipboard.'
+          : 'Notice: dialog blocking prompt entry. Clipboard backup failed.',
+      );
+    }
   } catch (e) {
     logger.warn('ContentScript', 'Continuation injection check failed:', e);
   }
@@ -335,6 +325,12 @@ export default defineContentScript({
             } else {
               sendResponse({ status: 'error', error: 'Clipboard API unavailable' });
             }
+            return true;
+          }
+
+          if (request.action === 'NUDGE_TRANSFER_INJECT') {
+            checkAndInjectContinuation(request.key);
+            sendResponse({ status: 'success' });
             return true;
           }
 

@@ -1,11 +1,41 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { formatMarkdown, sanitizeFilename } from '../src/shared/formatter.js';
+import { formatMarkdown, sanitizeFilename, normalizeLatexMath } from '../src/shared/formatter.js';
 import { DEFAULT_OPTIONS } from '../src/shared/storage.js';
 
 test('sanitizeFilename removes illegal characters and spaces', () => {
   const result = sanitizeFilename('Test: Article / Title? *');
   assert.equal(result, 'Test- Article - Title- -');
+});
+
+test('normalizeLatexMath preserves inline math in lists without breaking items', () => {
+  const input =
+    "* Initial Symmetrical Current ($$I''_k$$): The RMS value. Formula: $$I''_k = c \\cdot U_n / (\\sqrt{3} \\cdot Z_k)$$.\n\nStandalone:\n\n$$E = mc^2$$\n";
+  const result = normalizeLatexMath(input);
+
+  // Inline math should become single dollar signs
+  assert.ok(result.includes("($I''_k$)"));
+  assert.ok(result.includes("Formula: $I''_k = c \\cdot U_n / (\\sqrt{3} \\cdot Z_k)$"));
+  // Standalone math block must still use double dollars
+  assert.ok(result.includes('$$E = mc^2$$'));
+  // List item should not be fragmented with double newlines
+  assert.ok(!result.includes('*\n\nInitial'));
+});
+
+test('normalizeLatexMath converts bracket display and inline math', () => {
+  const input = 'Bracket display: \\[x^2 + y^2 = z^2\\] and inline \\(a + b\\).';
+  const result = normalizeLatexMath(input);
+  assert.ok(result.includes('$$x^2 + y^2 = z^2$$'));
+  assert.ok(result.includes('$a + b$'));
+});
+
+test('normalizeLatexMath handles delimiters adjacent to parentheses', () => {
+  const input = 'Parenthesized (\\(x + 1\\)) and bracketed \\[y = 2\\](next).';
+  const result = normalizeLatexMath(input);
+
+  assert.ok(result.includes('Parenthesized ($x + 1$)'));
+  assert.ok(result.includes('$$y = 2$$'));
+  assert.ok(result.includes('(next).'));
 });
 
 test('formatMarkdown includes YAML frontmatter when enabled', () => {

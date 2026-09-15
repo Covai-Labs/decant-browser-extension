@@ -29,6 +29,7 @@ export default defineConfig({
             'downloads',
             'scripting',
             'storage',
+            'alarms',
             'contextMenus',
             'clipboardWrite',
           ]
@@ -38,6 +39,7 @@ export default defineConfig({
             'downloads',
             'scripting',
             'storage',
+            'alarms',
             'contextMenus',
             'sidePanel',
             'clipboardWrite',

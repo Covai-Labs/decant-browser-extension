@@ -1,15 +1,22 @@
 /**
- * Utility for handing off decanted Markdown content to AI chat platforms
- * Supports ChatGPT, Claude, Gemini, DeepSeek, and Perplexity
+ * Utility for handing off decanted Markdown content to AI chat platforms.
+ * Supports 12 platforms: ChatGPT, Claude, Gemini, DeepSeek, Perplexity,
+ * Qwen, Mistral, Lumo, Copilot, Meta AI, Z.ai, and Grok.
  */
 
-export const AI_PLATFORMS = {
-  chatgpt: { name: 'ChatGPT', url: 'https://chatgpt.com/' },
-  claude: { name: 'Claude', url: 'https://claude.ai/new' },
-  gemini: { name: 'Gemini', url: 'https://gemini.google.com/app' },
-  deepseek: { name: 'DeepSeek', url: 'https://chat.deepseek.com/' },
-  perplexity: { name: 'Perplexity', url: 'https://www.perplexity.ai/' },
-};
+import { TRANSFER_TARGETS } from './transfer/targets.js';
+
+export const AI_PLATFORMS = Object.fromEntries(
+  TRANSFER_TARGETS.map((t) => [t.id, { name: t.label, url: t.url }]),
+);
+
+export {
+  TRANSFER_TARGETS,
+  TRANSFER_TARGET_IDS,
+  PLATFORM_URLS,
+  getTransferTarget,
+  isSupportedTransferTarget,
+} from './transfer/targets.js';
 
 export function buildAiPrompt({ title, url, content, template }) {
   if (template && template.trim().length > 0) {

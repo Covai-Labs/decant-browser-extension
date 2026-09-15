@@ -102,7 +102,7 @@ export function toHtml(data) {
       ${data.url ? `<p class="source"><a href="${esc(data.url)}" target="_blank" rel="noopener noreferrer">View original source &rarr;</a></p>` : ''}
     </header>
     <div class="content">
-      ${data.htmlContent}
+      ${getContentHtml(data)}
     </div>
     <footer>
       <p>Clipped on ${clippedAt} with <a href="https://decant.covai.org" target="_blank" rel="noopener noreferrer">Decant</a></p>
@@ -141,7 +141,8 @@ export function toJson(data) {
 export function toDoc(data) {
   // Word/LibreOffice opens HTML files saved with a .doc extension + UTF-8 BOM.
   // Remove interactive/SVG elements that can break LibreOffice's HTML import filter.
-  const docContent = (data.htmlContent || '')
+  const rawContent = getContentHtml(data);
+  const docContent = rawContent
     .replace(/<button[^>]*>[\s\S]*?<\/button>/gi, '')
     .replace(/<svg[^>]*>[\s\S]*?<\/svg>/gi, '');
 
@@ -228,4 +229,20 @@ function esc(str) {
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
+}
+
+function getContentHtml(data) {
+  if (
+    data?.htmlContent &&
+    typeof data.htmlContent === 'string' &&
+    data.htmlContent.trim().length > 0
+  ) {
+    return data.htmlContent;
+  }
+  const fallback = data?.content || data?.markdown || '';
+  if (!fallback) return '';
+  return fallback
+    .split(/\n\n+/)
+    .map((chunk) => `<p>${esc(chunk).replace(/\n/g, '<br />')}</p>`)
+    .join('\n');
 }
