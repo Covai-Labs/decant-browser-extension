@@ -38,11 +38,11 @@ Key differentiators:
 
 - 🗂️ **Multi-Tab Batch Clipper (`Alt+Shift+A`):** Clip all open tabs in the current window into one organized ZIP archive — individual Markdown files per tab. Ideal for research sessions, literature round-ups, and "save the whole reading list" moments.
 - 📝 **Clean Markdown:** Extract articles and main content into clean, structured Markdown with proper headings, tables, code fences, and preserved links.
-- 🔄 **1-Click PKM Note-taking Hand-off:** Send clipped content straight into **Obsidian** (`obsidian://new`), **Logseq**, **Bear**, **NotePlan**, or **Drafts** with customizable frontmatter (`title`, `date`, `url`, custom tags).
+- 🔄 **1-Click PKM & AI Handoff:** Send clipped content straight into **Obsidian** (`obsidian://new`), **Logseq**, **Bear**, **NotePlan**, or **Drafts**, or hand off summaries into 12 AI chat platforms (ChatGPT, Claude, Gemini, DeepSeek, Perplexity, Qwen, Mistral, Lumo, Copilot, Meta AI, Z.ai, Grok).
 - 👁️ **Live Preview Studio & Reader View:** Preview the decanted result in a clean reading view with **KaTeX** math rendering and **Prism** syntax highlighting across Dark, Light, and Solarized themes — before you save.
 - 📊 **Export Format Matrix:** Download as **Markdown (`.md`)**, **HTML (`.html`)**, **Word (`.doc`)**, or **JSON (`.json`)**, or copy to clipboard.
 - ⚡ **Side Panel & Shortcuts:** Clip, copy, and preview from the native Chromium side panel, plus keyboard shortcuts — `Alt+Shift+C` copy, `Alt+Shift+D` download, `Alt+Shift+A` batch clip.
-- 🖱️ **Right-click menus:** Decant the page or a text selection from the context menu.
+- 🖱️ **Right-click menus:** Decant the page or text selection from the context menu, or send directly to your default AI platform.
 - 🎨 **Custom Frontmatter & Formatting:** Configurable templates for metadata tags, page URLs, titles, and dates.
 - 🔒 **100% Private & Local:** All parsing happens on-device in your browser. Zero tracking or telemetry. See [Privacy](#privacy).
 

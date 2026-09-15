@@ -56,3 +56,20 @@ test('toDoc creates Word-compatible HTML blob with BOM', async () => {
   assert.ok(text.includes('Test Article Title'));
   assert.ok(text.includes('By Jane Doe'));
 });
+
+test('toHtml and toDoc fall back gracefully when htmlContent is empty', async () => {
+  const noHtmlData = {
+    ...mockArticleData,
+    htmlContent: '',
+    content: 'Paragraph one.\n\nParagraph two.',
+  };
+  const htmlResult = toHtml(noHtmlData);
+  const htmlText = await htmlResult.blob.text();
+  assert.ok(htmlText.includes('<p>Paragraph one.</p>'));
+  assert.ok(htmlText.includes('<p>Paragraph two.</p>'));
+
+  const docResult = toDoc(noHtmlData);
+  const docText = await docResult.blob.text();
+  assert.ok(docText.includes('<p>Paragraph one.</p>'));
+  assert.ok(docText.includes('<p>Paragraph two.</p>'));
+});
