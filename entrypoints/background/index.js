@@ -6,13 +6,21 @@ import {
   getTransferTarget,
   buildAiPrompt,
 } from '../../src/shared/ai-transfer.js';
-import { expiredTransferKeys } from '../../src/shared/transfer/records.js';
+import {
+  MAX_CHUNKS,
+  chunkKey,
+  expiredTransferKeys,
+  splitPayload,
+  transferKey,
+} from '../../src/shared/transfer/records.js';
 import { logger } from '../../src/shared/logger.js';
 import { getMessage } from '../../src/shared/i18n.js';
 import { clipAllTabs, downloadFile } from '../../src/shared/batch-clipper.js';
 
 const UNINSTALL_URL = 'https://decant.covai.org/uninstall-feedback.html';
 const WELCOME_URL = 'https://decant.covai.org/welcome.html';
+const TRANSFER_CLEANUP_ALARM = 'prune-transfer-records';
+const TRANSFER_CLEANUP_PERIOD_MINUTES = 5;
 
 export default defineBackground({
   type: 'module',
@@ -361,8 +369,24 @@ export default defineBackground({
       };
 
       if (newTab && newTab.id !== undefined) {
-        const key = `xfer_${newTab.id}`;
-        await browser.storage.local.set({ [key]: { ...base, payload } });
+        const chunks = splitPayload(payload);
+        if (chunks.length > MAX_CHUNKS) {
+          throw new Error('Transfer payload is too large.');
+        }
+        const key = transferKey(newTab.id);
+        const entries = {};
+        if (chunks.length > 1) {
+          entries[key] = { ...base, chunked: true, count: chunks.length };
+          chunks.forEach((chunk, index) => {
+            entries[chunkKey(newTab.id, index)] = chunk;
+          });
+        } else {
+          entries[key] = { ...base, payload };
+        }
+        await browser.storage.local.set(entries);
+        browser.tabs
+          .sendMessage(newTab.id, { action: 'NUDGE_TRANSFER_INJECT', key })
+          .catch(() => {});
         pruneTransferKeys();
       } else {
         await browser.storage.local.set({ pendingContinuation: { ...base, payload } });
@@ -381,6 +405,18 @@ export default defineBackground({
       } catch {
         // ignore
       }
+    }
+
+    pruneTransferKeys();
+    if (browser.alarms) {
+      browser.alarms.create(TRANSFER_CLEANUP_ALARM, {
+        periodInMinutes: TRANSFER_CLEANUP_PERIOD_MINUTES,
+      });
+      browser.alarms.onAlarm.addListener((alarm) => {
+        if (alarm.name === TRANSFER_CLEANUP_ALARM) {
+          pruneTransferKeys();
+        }
+      });
     }
 
     browser.runtime.onMessage.addListener((request, sender, sendResponse) => {

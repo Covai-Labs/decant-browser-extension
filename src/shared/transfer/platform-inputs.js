@@ -62,9 +62,9 @@ export const GENERIC_COMPOSER_SELECTORS = [
   'textarea:not([aria-hidden="true"]):not([tabindex="-1"])',
 ];
 
-export function getComposerSelectors(targetId) {
+export function getComposerSelectors(targetId, { includeGeneric = true } = {}) {
   const specific = COMPOSER_SELECTORS[targetId] || [];
-  return [...specific, ...GENERIC_COMPOSER_SELECTORS];
+  return includeGeneric ? [...specific, ...GENERIC_COMPOSER_SELECTORS] : specific;
 }
 
 // Send-button selectors for auto-send. Targets without an entry use Enter key.

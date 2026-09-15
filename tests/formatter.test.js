@@ -29,6 +29,15 @@ test('normalizeLatexMath converts bracket display and inline math', () => {
   assert.ok(result.includes('$a + b$'));
 });
 
+test('normalizeLatexMath handles delimiters adjacent to parentheses', () => {
+  const input = 'Parenthesized (\\(x + 1\\)) and bracketed \\[y = 2\\](next).';
+  const result = normalizeLatexMath(input);
+
+  assert.ok(result.includes('Parenthesized ($x + 1$)'));
+  assert.ok(result.includes('$$y = 2$$'));
+  assert.ok(result.includes('(next).'));
+});
+
 test('formatMarkdown includes YAML frontmatter when enabled', () => {
   const article = {
     title: 'Hello World',

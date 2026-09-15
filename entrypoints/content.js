@@ -162,13 +162,10 @@ export async function checkAndInjectContinuation(nudgeKey) {
       document,
       isTopFrame: window.top === window,
       clipboardWrite: async (text) => {
-        try {
-          if (navigator.clipboard && navigator.clipboard.writeText) {
-            await navigator.clipboard.writeText(text);
-          }
-        } catch {
-          // ignore
+        if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+          throw new Error('Clipboard API unavailable.');
         }
+        await navigator.clipboard.writeText(text);
       },
     };
 
@@ -189,7 +186,11 @@ export async function checkAndInjectContinuation(nudgeKey) {
         result.autoSent ? 'Decanted & prompt submitted!' : 'Decanted & prompt populated!',
       );
     } else if (result.reason === 'blocked') {
-      showDecantToast('Notice: dialog blocking prompt entry. Copied to clipboard.');
+      showDecantToast(
+        result.clipboardBackup
+          ? 'Notice: dialog blocking prompt entry. Copied to clipboard.'
+          : 'Notice: dialog blocking prompt entry. Clipboard backup failed.',
+      );
     }
   } catch (e) {
     logger.warn('ContentScript', 'Continuation injection check failed:', e);

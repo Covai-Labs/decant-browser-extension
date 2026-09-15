@@ -12,6 +12,7 @@ import {
 import {
   findComposer,
   findBlocker,
+  isVisible,
   verifyContent,
   attemptTransferInject,
   pollTransferInject,
@@ -23,6 +24,8 @@ import {
   expiredTransferKeys,
   transferKey,
   chunkKey,
+  loadTransferRecord,
+  loadTransferRecordByKey,
 } from '../src/shared/transfer/records.js';
 
 function docOf(html) {
@@ -146,6 +149,28 @@ test('injector: finds grok query-bar editor', () => {
   assert.ok(comp);
 });
 
+test('injector: element without layout geometry is hidden unless fixed', () => {
+  const makeElement = (position) => ({
+    ownerDocument: {
+      defaultView: {
+        getComputedStyle: () => ({
+          display: 'block',
+          visibility: 'visible',
+          opacity: '1',
+          position,
+        }),
+      },
+    },
+    offsetParent: null,
+    getClientRects: () => [],
+    getAttribute: () => null,
+    hasAttribute: () => false,
+  });
+
+  assert.equal(isVisible(makeElement('static')), false);
+  assert.equal(isVisible(makeElement('fixed')), true);
+});
+
 // ── injector: blocker finding ─────────────────────────────────────
 
 test('injector: detects active modal dialog blocker', () => {
@@ -187,6 +212,69 @@ test('injector: verifyContent matches normalized text', () => {
   const ta = doc.querySelector('textarea');
   assert.equal(verifyContent(ta, 'hello world'), true);
   assert.equal(verifyContent(ta, 'goodbye'), false);
+  assert.equal(verifyContent(ta, 'hello'), false);
+});
+
+test('injector: generic composer match disables auto-send', async () => {
+  const doc = docOf('<div contenteditable="true" role="textbox"></div>');
+  const res = await attemptTransferInject(okEnv(doc), {
+    payload: 'Do not submit this',
+    targetPlatform: 'chatgpt',
+    autoSend: true,
+  });
+
+  assert.equal(res.ok, true);
+  assert.equal(res.autoSent, false);
+  assert.equal(res.autoSendSkipped, 'generic-composer');
+});
+
+test('records: unkeyed load reads only legacy pendingContinuation', async () => {
+  const calls = [];
+  const storage = {
+    async get(key) {
+      calls.push(key);
+      return {
+        pendingContinuation: {
+          url: 'https://chatgpt.com/',
+          timestamp: 999_000,
+          payload: 'legacy',
+        },
+      };
+    },
+  };
+
+  const loaded = await loadTransferRecord(storage, { origin: 'https://chatgpt.com' }, 1_000_000);
+  assert.equal(loaded.payload, 'legacy');
+  assert.deepEqual(calls, ['pendingContinuation']);
+});
+
+test('records: keyed load retrieves only its base record and chunk keys', async () => {
+  const calls = [];
+  const storage = {
+    async get(key) {
+      calls.push(key);
+      if (key === 'xfer_7') {
+        return {
+          xfer_7: {
+            url: 'https://chatgpt.com/',
+            timestamp: 999_000,
+            chunked: true,
+            count: 2,
+          },
+        };
+      }
+      return { xfer_7_c0: 'hello ', xfer_7_c1: 'world' };
+    },
+  };
+
+  const loaded = await loadTransferRecordByKey(
+    storage,
+    'xfer_7',
+    { origin: 'https://chatgpt.com' },
+    1_000_000,
+  );
+  assert.equal(loaded.payload, 'hello world');
+  assert.deepEqual(calls, ['xfer_7', ['xfer_7_c0', 'xfer_7_c1']]);
 });
 
 test('injector: attemptTransferInject rejects on non-top frame', async () => {

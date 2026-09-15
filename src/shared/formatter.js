@@ -29,12 +29,12 @@ export function normalizeLatexMath(text) {
   if (!text || typeof text !== 'string') return text || '';
 
   // 1. Convert bracket display math \[ ... \] or \\[ ... \\] to $$ ... $$
-  let result = text.replace(/(?:\\{1,2}\[)([\s\S]+?)(?:\\{1,2}\])(?!\()/g, (match, math) => {
+  let result = text.replace(/(?:\\{1,2}\[)([\s\S]+?)(?:\\{1,2}\])/g, (match, math) => {
     return `\n\n$$${math}$$\n\n`;
   });
 
   // 2. Convert bracket inline math \( ... \) or \\( ... \\) to $ ... $
-  result = result.replace(/(?:\\{1,2}\()([\s\S]+?)(?:\\{1,2}\))(?!\))/g, (match, math) => {
+  result = result.replace(/(?:\\{1,2}\()([\s\S]+?)(?:\\{1,2}\))/g, (match, math) => {
     return `$${math}$`;
   });
 

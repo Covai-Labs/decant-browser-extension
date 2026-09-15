@@ -2,8 +2,8 @@
 //
 // Each transfer owns keys scoped to the tab it created (`xfer_<tabId>`), so
 // concurrent transfers never read-modify-write shared state. The content
-// script picks its record by matching the stored target origin against the
-// page it runs on — it never needs to know its own tab id.
+// script receives the exact key from a background nudge. Unkeyed loading is
+// reserved for the legacy pendingContinuation fallback.
 
 export const TRANSFER_KEY_PREFIX = 'xfer_';
 export const LEGACY_TRANSFER_KEY = 'pendingContinuation';
@@ -142,7 +142,7 @@ async function joinChunkedByKey(storage, dump, key, record) {
 export async function loadTransferRecord(storage, location, now = Date.now()) {
   let dump;
   try {
-    dump = (await storage.get(null)) || {};
+    dump = (await storage.get(LEGACY_TRANSFER_KEY)) || {};
   } catch {
     return null;
   }
@@ -166,6 +166,7 @@ export async function loadTransferRecord(storage, location, now = Date.now()) {
 export async function loadTransferRecordByKey(storage, key, location, now = Date.now()) {
   if (!key || typeof key !== 'string') return loadTransferRecord(storage, location, now);
   if (key === LEGACY_TRANSFER_KEY) return loadTransferRecord(storage, location, now);
+  if (!/^xfer_\d+$/.test(key)) return null;
   let record;
   try {
     const res = (await storage.get(key)) || {};
@@ -184,13 +185,7 @@ export async function loadTransferRecordByKey(storage, key, location, now = Date
   let payload = record.payload;
   let keys = [key];
   if (record.chunked) {
-    let dump;
-    try {
-      dump = (await storage.get(null)) || {};
-    } catch {
-      return null;
-    }
-    ({ payload, keys } = await joinChunkedByKey(storage, dump, key, record));
+    ({ payload, keys } = await joinChunkedByKey(storage, { [key]: record }, key, record));
   }
   if (!payload) return null;
   return { keys, record, payload };

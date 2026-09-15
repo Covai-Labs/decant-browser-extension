@@ -20,10 +20,10 @@ function isHiddenByAttr(el) {
 export function isVisible(el) {
   if (!el) return false;
   if (isHiddenByAttr(el)) return false;
+  const win =
+    (el.ownerDocument && el.ownerDocument.defaultView) ||
+    (typeof window !== 'undefined' ? window : null);
   try {
-    const win =
-      (el.ownerDocument && el.ownerDocument.defaultView) ||
-      (typeof window !== 'undefined' ? window : null);
     if (win && typeof win.getComputedStyle === 'function') {
       const cs = win.getComputedStyle(el);
       if (cs && (cs.display === 'none' || cs.visibility === 'hidden' || cs.opacity === '0')) {
@@ -37,9 +37,7 @@ export function isVisible(el) {
     if (el.offsetParent !== null) return true;
     try {
       const pos =
-        typeof window !== 'undefined' && window.getComputedStyle
-          ? window.getComputedStyle(el).position
-          : '';
+        win && typeof win.getComputedStyle === 'function' ? win.getComputedStyle(el).position : '';
       if (pos === 'fixed') return true;
     } catch {
       // ignore
@@ -52,7 +50,7 @@ export function isVisible(el) {
       // ignore
     }
   }
-  return true;
+  return typeof el.offsetParent === 'undefined' && typeof el.getClientRects !== 'function';
 }
 
 function isMeasuringMirror(el) {
@@ -76,22 +74,33 @@ export function isEditable(el) {
   return false;
 }
 
-export function findComposer(doc, targetId) {
+function findComposerMatch(doc, targetId) {
   if (!doc || typeof doc.querySelectorAll !== 'function') return null;
-  for (const sel of getComposerSelectors(targetId)) {
-    let nodes;
-    try {
-      nodes = doc.querySelectorAll(sel);
-    } catch {
-      continue;
-    }
-    if (!nodes) continue;
-    for (const el of nodes) {
-      if (isMeasuringMirror(el)) continue;
-      if (isEditable(el) && isVisible(el)) return el;
+  const specificSelectors = getComposerSelectors(targetId, { includeGeneric: false });
+  const selectorGroups = [
+    { selectors: specificSelectors, generic: false },
+    { selectors: getComposerSelectors(targetId).slice(specificSelectors.length), generic: true },
+  ];
+  for (const { selectors, generic } of selectorGroups) {
+    for (const sel of selectors) {
+      let nodes;
+      try {
+        nodes = doc.querySelectorAll(sel);
+      } catch {
+        continue;
+      }
+      if (!nodes) continue;
+      for (const el of nodes) {
+        if (isMeasuringMirror(el)) continue;
+        if (isEditable(el) && isVisible(el)) return { composer: el, generic };
+      }
     }
   }
   return null;
+}
+
+export function findComposer(doc, targetId) {
+  return findComposerMatch(doc, targetId)?.composer || null;
 }
 
 export function findBlocker(doc, composer) {
@@ -259,16 +268,7 @@ export function verifyContent(el, text) {
   const got = norm(readBack(el));
   if (!got) return false;
   const want = norm(text);
-  if (got.includes(want.slice(0, 200))) return true;
-  if (want.length > 0 && got.length >= Math.min(want.length, 50)) {
-    let matches = 0;
-    const probe = want.slice(0, 200).split(' ');
-    for (const w of probe) {
-      if (w.length > 3 && got.includes(w)) matches++;
-    }
-    if (probe.length > 0 && matches / probe.length > 0.5) return true;
-  }
-  return false;
+  return got.length === want.length && got === want;
 }
 
 export function sendViaButton(doc, targetId) {
@@ -316,8 +316,9 @@ export async function attemptTransferInject(env, { payload, targetPlatform, auto
   if (env.isTopFrame === false) return { ok: false, reason: 'not-top-frame' };
   if (!payload) return { ok: false, reason: 'empty-payload' };
 
-  const composer = findComposer(doc, targetPlatform);
-  if (!composer) return { ok: false, reason: 'composer-not-found' };
+  const composerMatch = findComposerMatch(doc, targetPlatform);
+  if (!composerMatch) return { ok: false, reason: 'composer-not-found' };
+  const { composer, generic: genericComposer } = composerMatch;
 
   const blocker = findBlocker(doc, composer);
   if (blocker) {
@@ -342,8 +343,8 @@ export async function attemptTransferInject(env, { payload, targetPlatform, auto
   }
 
   let autoSent = false;
-  let autoSendSkipped = null;
-  if (autoSend) {
+  let autoSendSkipped = autoSend && genericComposer ? 'generic-composer' : null;
+  if (autoSend && !genericComposer) {
     const dispatched = sendViaButton(doc, targetPlatform) || sendViaEnter(composer);
     if (!dispatched) {
       autoSendSkipped = 'send-failed';

@@ -4,7 +4,7 @@
 
 **The distraction-free web clipper and research batcher.**
 
-_Decant articles and web content into clean, structured Markdown, Word, HTML, and JSON — 100% locally with zero telemetry._
+_Decant articles and web content into clean, structured Markdown, Word, HTML, and JSON with local extraction and zero telemetry._
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-red.svg)](LICENSE)
 [![GitHub](https://img.shields.io/github/stars/Covai-Labs/decant?logo=github&logoColor=white&color=yellow&label=Stars)](https://github.com/Covai-Labs/decant)
@@ -30,7 +30,7 @@ Key differentiators:
 
 - **Multi-Tab Batch Clipper (`Alt+Shift+A`)** — ingest every open research tab into a single clean ZIP of structured Markdown files.
 - **1-Click PKM hand-off** — direct URL-scheme triggers for Obsidian, Logseq, Bear, NotePlan, and Drafts with customizable YAML frontmatter.
-- **Strictly local extraction** — Mozilla Readability runs on-device; nothing your browser reads ever leaves your machine.
+- **Strictly local extraction** — Mozilla Readability runs on-device. Content leaves your machine only when you explicitly hand it off to an external destination, such as an AI service.
 
 ---
 
@@ -69,7 +69,7 @@ Key differentiators:
 
 ## Privacy
 
-Decant is **strictly local by design** — the same philosophy as the on-device extraction it uses.
+Decant keeps extraction and conversion local by design. Explicitly handing content off to an AI service shares it with the configured third-party provider.
 
 | Permission                | Why it's needed                                                            |
 | :------------------------ | :------------------------------------------------------------------------- |
@@ -79,7 +79,7 @@ Decant is **strictly local by design** — the same philosophy as the on-device 
 | `clipboardWrite`          | Copy Markdown to your clipboard                                            |
 | `contextMenus`            | Add right-click "Decant to Markdown" menu items                            |
 
-No third-party APIs. No analytics. No telemetry endpoints. No server round-trips — content only touches memory, the clipboard, your downloads folder, or your PKM app. Audit it yourself: [PRIVACY.md](PRIVACY.md) and the full [source](https://github.com/Covai-Labs/decant).
+Decant has no analytics or telemetry endpoints. Extraction remains on-device; content is sent off-device only when you explicitly transfer it to a configured third-party AI provider or another external destination. Audit it yourself: [PRIVACY.md](PRIVACY.md) and the full [source](https://github.com/Covai-Labs/decant).
 
 ---
 
