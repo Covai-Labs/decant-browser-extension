@@ -11,7 +11,7 @@ This guide covers local setup, build system, testing, and project structure for 
 ## Setup
 
 ```bash
-git clone https://github.com/Covai-Labs/decant.git
+git clone https://github.com/Covai-Labs/decant-browser-extension.git
 cd decant
 npm install
 ```

@@ -7,7 +7,7 @@
 _Decant articles and web content into clean, structured Markdown, Word, HTML, and JSON with local extraction and zero telemetry._
 
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-red.svg)](LICENSE)
-[![GitHub](https://img.shields.io/github/stars/Covai-Labs/decant?logo=github&logoColor=white&color=yellow&label=Stars)](https://github.com/Covai-Labs/decant)
+[![GitHub](https://img.shields.io/github/stars/Covai-Labs/decant-browser-extension?logo=github&logoColor=white&color=yellow&label=Stars)](https://github.com/Covai-Labs/decant-browser-extension)
 [![Made with WXT](https://img.shields.io/badge/WXT-0.21-ff90e8)](https://wxt.dev)
 
 [Quick Install](#quick-install) • [Features](#key-features) • [Privacy](#privacy) • [Development](#development) • [Contributing](#contributing)
@@ -79,7 +79,7 @@ Decant keeps extraction and conversion local by design. Explicitly handing conte
 | `clipboardWrite`          | Copy Markdown to your clipboard                                            |
 | `contextMenus`            | Add right-click "Decant to Markdown" menu items                            |
 
-Decant has no analytics or telemetry endpoints. Extraction remains on-device; content is sent off-device only when you explicitly transfer it to a configured third-party AI provider or another external destination. Audit it yourself: [PRIVACY.md](PRIVACY.md) and the full [source](https://github.com/Covai-Labs/decant).
+Decant has no analytics or telemetry endpoints. Extraction remains on-device; content is sent off-device only when you explicitly transfer it to a configured third-party AI provider or another external destination. Audit it yourself: [PRIVACY.md](PRIVACY.md) and the full [source](https://github.com/Covai-Labs/decant-browser-extension).
 
 ---
 
@@ -115,4 +115,4 @@ This project is licensed under the **GNU Affero General Public License v3.0 (AGP
 
 Sample fixtures located in [`tests/fixtures/`](tests/fixtures/) are retained solely for automated regression testing and extraction verification under fair use principles. They are excluded from the project's AGPL-3.0 license. See [`tests/fixtures/README.md`](tests/fixtures/README.md) for details.
 
-Acknowledgments: [decant-core](https://github.com/Covai-Labs/decant-core) — shared parsing engine; Mozilla Readability; Turndown + GFM; JSZip; WXT.
+Acknowledgments: [decant-core](https://github.com/Covai-Labs/decant) — shared parsing engine; Mozilla Readability; Turndown + GFM; JSZip; WXT.

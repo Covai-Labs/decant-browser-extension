@@ -1,5 +1,5 @@
 {
-  "name": "decant",
+  "name": "decant-browser-extension",
   "version": "1.8.0",
   "description": "Fast, privacy-first Manifest V3 web clipper that decants articles and web pages into clean Markdown.",
   "main": ".output/chrome-mv3/background.js",
@@ -28,6 +28,14 @@
     "obsidian"
   ],
   "author": "deadrat-in",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Covai-Labs/decant-browser-extension.git"
+  },
+  "bugs": {
+    "url": "https://github.com/Covai-Labs/decant-browser-extension/issues"
+  },
+  "homepage": "https://decant.covai.org",
   "license": "AGPL-3.0-only",
   "dependencies": {
     "decant-core": "latest",
