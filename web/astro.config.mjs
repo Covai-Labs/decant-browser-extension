@@ -1,10 +1,11 @@
 import { defineConfig } from 'astro/config';
+import sitemap from '@astrojs/sitemap';
 
-// Static sitemap lives in public/sitemap.xml — URLs are stable so the build
-// stays fast and avoids sitemap index duplication. Output targets ../docs for
-// GitHub Pages, matching the ai-chat-exporter website architecture.
+// Sitemap is generated at build time via @astrojs/sitemap. Output targets
+// ../docs for GitHub Pages, matching the ai-chat-exporter website architecture.
 export default defineConfig({
   site: 'https://decant.covai.org',
+  integrations: [sitemap()],
   outDir: '../docs',
   build: {
     format: 'file',

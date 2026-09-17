@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://decant.covai.org/sitemap.xml
+Sitemap: https://decant.covai.org/sitemap-index.xml
