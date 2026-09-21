@@ -13,6 +13,7 @@ export default defineConfig({
           '128': 'icons/icon128.png',
         };
         manifest.sidebar_action.default_title = '__MSG_extShortName__';
+        manifest.sidebar_action.open_at_install = false;
       }
     },
   },

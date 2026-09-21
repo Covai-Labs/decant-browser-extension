@@ -93,6 +93,28 @@ export default defineBackground({
       }
     }
 
+    async function syncFirefoxSidebar() {
+      if (
+        typeof browser !== 'undefined' &&
+        browser.sidebarAction &&
+        typeof browser.sidebarAction.setPanel === 'function'
+      ) {
+        try {
+          const options = await getOptions();
+          if (options.firefoxSidebarEnabled) {
+            await browser.sidebarAction.setPanel({ panel: 'sidepanel.html' });
+          } else {
+            await browser.sidebarAction.setPanel({ panel: '' });
+            if (typeof browser.sidebarAction.close === 'function') {
+              await browser.sidebarAction.close().catch(() => {});
+            }
+          }
+        } catch (e) {
+          logger.debug('Background', 'Failed to sync Firefox sidebar:', e);
+        }
+      }
+    }
+
     // Setup Context Menus & Onboarding
     browser.runtime.onInstalled.addListener(async (details) => {
       logger.info('Background', 'Extension event details:', details.reason);
@@ -102,12 +124,14 @@ export default defineBackground({
       }
 
       await setupContextMenus();
+      await syncFirefoxSidebar();
       await injectContentScriptIntoOpenTabs();
     });
 
     if (browser.runtime.onStartup) {
       browser.runtime.onStartup.addListener(async () => {
         await setupContextMenus();
+        await syncFirefoxSidebar();
       });
     }
 
@@ -116,6 +140,9 @@ export default defineBackground({
         if (areaName === 'sync' || areaName === 'local') {
           if (changes.options || changes.defaultAiTarget) {
             setupContextMenus();
+          }
+          if (changes.firefoxSidebarEnabled || changes.options) {
+            syncFirefoxSidebar();
           }
         }
       });
