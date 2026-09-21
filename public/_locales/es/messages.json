@@ -3,6 +3,10 @@
     "message": "Decant - Capturador web a Markdown",
     "description": "The name of the extension"
   },
+  "extShortName": {
+    "message": "Decant",
+    "description": "The short extension name"
+  },
   "extDescription": {
     "message": "Capturador web rápido y privado que convierte artículos y páginas web en Markdown limpio.",
     "description": "The description of the extension"
@@ -155,5 +159,13 @@
     "placeholders": {
       "1": { "content": "$1" }
     }
+  },
+  "transferCopyClipboardLabel": {
+    "message": "Copiar mensaje al portapapeles al transferir",
+    "description": "Label for transfer copy to clipboard checkbox"
+  },
+  "transferCopyClipboardHelp": {
+    "message": "Cuando está activado, también copia el mensaje transferido al portapapeles como respaldo para que puedas pegarlo manualmente (Ctrl+V) si la inyección falla.",
+    "description": "Help for transfer copy to clipboard checkbox"
   }
 }

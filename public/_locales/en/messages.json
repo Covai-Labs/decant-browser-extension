@@ -3,6 +3,10 @@
     "message": "Decant - Web to Markdown Clipper",
     "description": "The name of the extension"
   },
+  "extShortName": {
+    "message": "Decant",
+    "description": "The short extension name"
+  },
   "extDescription": {
     "message": "Fast, privacy-first web clipper that decants articles and webpages into clean Markdown.",
     "description": "The description of the extension"
@@ -155,5 +159,13 @@
     "placeholders": {
       "1": { "content": "$1" }
     }
+  },
+  "transferCopyClipboardLabel": {
+    "message": "Copy prompt to clipboard on transfer",
+    "description": "Label for transfer copy to clipboard checkbox"
+  },
+  "transferCopyClipboardHelp": {
+    "message": "When enabled, also copies the transferred prompt to your clipboard as a backup so you can manually paste (Ctrl+V) if injection fails.",
+    "description": "Help for transfer copy to clipboard checkbox"
   }
 }

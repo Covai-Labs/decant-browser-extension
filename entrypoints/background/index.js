@@ -134,7 +134,7 @@ export default defineBackground({
       } else if (info.menuItemId === 'decant-clip-all') {
         handleBatchClip(tab.windowId, options, 'zip');
       } else if (info.menuItemId === 'decant-transfer-ai') {
-        handleTransferContextMenu(tab, options, info.selectionText);
+        handleTransferContextMenu(tab, options, info);
       }
     });
 
@@ -161,15 +161,50 @@ export default defineBackground({
       }
     });
 
-    async function handleTransferContextMenu(tab, options, selectionText) {
+    async function handleTransferContextMenu(tab, options, info = {}) {
       try {
         const target = options.defaultAiTarget || 'chatgpt';
+        const targetFrameId = typeof info.frameId === 'number' ? info.frameId : undefined;
+        const sendOptions = targetFrameId !== undefined ? { frameId: targetFrameId } : undefined;
+
+        let selectedText = info.selectionText ? info.selectionText.trim() : '';
+
+        // If info.selectionText is empty, query content script in tab/frame
+        if (!selectedText && tab && tab.id !== undefined) {
+          try {
+            const selRes = await browser.tabs.sendMessage(
+              tab.id,
+              { action: 'GET_CURRENT_SELECTION' },
+              sendOptions,
+            );
+            if (selRes && selRes.success && typeof selRes.selection === 'string') {
+              selectedText = selRes.selection.trim();
+            }
+          } catch {
+            if (targetFrameId && targetFrameId !== 0) {
+              try {
+                const topRes = await browser.tabs.sendMessage(
+                  tab.id,
+                  { action: 'GET_CURRENT_SELECTION' },
+                  { frameId: 0 },
+                );
+                if (topRes && topRes.success && typeof topRes.selection === 'string') {
+                  selectedText = topRes.selection.trim();
+                }
+              } catch {
+                // Ignore
+              }
+            }
+          }
+        }
+
         let payload = '';
-        if (selectionText && selectionText.trim().length > 0) {
+        if (selectedText && selectedText.length > 0) {
+          const effectiveUrl = info.frameUrl || info.pageUrl || tab.url || '';
           payload = buildAiPrompt({
             title: tab.title || 'Selected Text',
-            url: tab.url || '',
-            content: selectionText.trim(),
+            url: effectiveUrl,
+            content: selectedText,
             template: options.aiPromptTemplate,
           });
         } else {
@@ -202,6 +237,17 @@ export default defineBackground({
         }
 
         if (payload) {
+          if (options.transferCopyToClipboard !== false && tab?.id !== undefined) {
+            try {
+              await browser.tabs.sendMessage(
+                tab.id,
+                { action: 'COPY_TO_CLIPBOARD', text: payload, message: false },
+                sendOptions,
+              );
+            } catch {
+              // Ignore
+            }
+          }
           await performTransfer(target, payload, tab.title || 'Decanted Article', true);
         }
       } catch (err) {
