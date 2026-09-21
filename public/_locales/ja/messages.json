@@ -3,6 +3,10 @@
     "message": "Decant - WebからMarkdownクリッパー",
     "description": "The name of the extension"
   },
+  "extShortName": {
+    "message": "Decant",
+    "description": "The short extension name"
+  },
   "extDescription": {
     "message": "記事やウェブページをクリーンなMarkdownに変換する、高速でプライバシー重視のウェブクリッパー。",
     "description": "The description of the extension"
@@ -155,5 +159,21 @@
     "placeholders": {
       "1": { "content": "$1" }
     }
+  },
+  "transferCopyClipboardLabel": {
+    "message": "転送時にプロンプトをクリップボードにコピー",
+    "description": "Label for transfer copy to clipboard checkbox"
+  },
+  "transferCopyClipboardHelp": {
+    "message": "有効にすると、転送されたプロンプトがバックアップとしてクリップボードにもコピーされ、自動入力に失敗した場合に手動で貼り付け（Ctrl+V）できます。",
+    "description": "Help for transfer copy to clipboard checkbox"
+  },
+  "firefoxSidebarTitle": {
+    "message": "Firefox ブラウザ サイドバー",
+    "description": "Title for Firefox sidebar section in options"
+  },
+  "firefoxSidebarDesc": {
+    "message": "ブラウザのサイドバーは、ブラウザのサイドバー切り替えボタンまたはキーボード ショートカットを使用してネイティブに開閉できます。",
+    "description": "Description for Firefox sidebar section in options"
   }
 }

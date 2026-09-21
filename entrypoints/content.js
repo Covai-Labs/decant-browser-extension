@@ -9,6 +9,7 @@ import {
 import { DEFAULT_OPTIONS } from '../src/shared/storage.js';
 import { formatMarkdown, sanitizeFilename, normalizeLatexMath } from '../src/shared/formatter.js';
 import { pollTransferInject } from '../src/shared/transfer/injector.js';
+import { getTransferTarget } from '../src/shared/transfer/targets.js';
 import {
   loadTransferRecord,
   loadTransferRecordByKey,
@@ -158,15 +159,34 @@ export async function checkAndInjectContinuation(nudgeKey) {
     if (!recordInfo || !recordInfo.payload) return;
 
     const { keys, record, payload } = recordInfo;
+
+    let copyToClipboardEnabled = true;
+    try {
+      if (browser.storage.sync) {
+        const syncData = await browser.storage.sync.get('transferCopyToClipboard');
+        if (typeof syncData?.transferCopyToClipboard === 'boolean') {
+          copyToClipboardEnabled = syncData.transferCopyToClipboard;
+        }
+      }
+    } catch {
+      // default to true
+    }
+
+    const target = getTransferTarget(record.targetPlatform);
+    const label = target?.label || record.targetPlatform || 'target chat';
+    const autoSend = record.autoSend !== false && target?.requiresAuth !== true;
+
     const env = {
       document,
       isTopFrame: window.top === window,
-      clipboardWrite: async (text) => {
-        if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
-          throw new Error('Clipboard API unavailable.');
-        }
-        await navigator.clipboard.writeText(text);
-      },
+      clipboardWrite: copyToClipboardEnabled
+        ? async (text) => {
+            if (!navigator.clipboard || typeof navigator.clipboard.writeText !== 'function') {
+              throw new Error('Clipboard API unavailable.');
+            }
+            await navigator.clipboard.writeText(text);
+          }
+        : undefined,
     };
 
     const result = await pollTransferInject(
@@ -174,7 +194,7 @@ export async function checkAndInjectContinuation(nudgeKey) {
       {
         payload,
         targetPlatform: record.targetPlatform,
-        autoSend: record.autoSend !== false,
+        autoSend,
       },
       { maxWaitMs: 15000, pollMs: 500 },
     );
@@ -185,12 +205,29 @@ export async function checkAndInjectContinuation(nudgeKey) {
       showDecantToast(
         result.autoSent ? 'Decanted & prompt submitted!' : 'Decanted & prompt populated!',
       );
-    } else if (result.reason === 'blocked') {
-      showDecantToast(
-        result.clipboardBackup
-          ? 'Notice: dialog blocking prompt entry. Copied to clipboard.'
-          : 'Notice: dialog blocking prompt entry. Clipboard backup failed.',
-      );
+    } else {
+      let copied = false;
+      if (copyToClipboardEnabled) {
+        try {
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            await navigator.clipboard.writeText(payload);
+            copied = true;
+          }
+        } catch {
+          copied = false;
+        }
+      }
+      await clearTransferRecord(browser.storage.local, keys);
+      if (copied) {
+        const hint =
+          result.reason === 'blocked'
+            ? `dismiss any pop-up on ${label}, then press Ctrl+V`
+            : `press Ctrl+V in the ${label} chat box`;
+        showDecantToast(`⚠️ Couldn't auto-fill ${label} — prompt copied, ${hint}`);
+      } else {
+        showDecantToast(`⚠️ Couldn't auto-fill ${label}`);
+      }
+      logger.warn('ContentScript', 'Transfer inject failed:', result);
     }
   } catch (e) {
     logger.warn('ContentScript', 'Continuation injection check failed:', e);
@@ -313,17 +350,38 @@ export default defineContentScript({
             return true;
           }
 
+          if (request.action === 'GET_CURRENT_SELECTION') {
+            let selection = '';
+            try {
+              selection = window.getSelection ? window.getSelection().toString() : '';
+              if (!selection && document.activeElement) {
+                const el = document.activeElement;
+                if (typeof el.selectionStart === 'number' && typeof el.selectionEnd === 'number') {
+                  selection = (el.value || '').slice(el.selectionStart, el.selectionEnd);
+                }
+              }
+            } catch {
+              // ignore
+            }
+            sendResponse({ success: true, selection: selection || '' });
+            return true;
+          }
+
           if (request.action === 'COPY_TO_CLIPBOARD') {
             if (navigator.clipboard && navigator.clipboard.writeText) {
               navigator.clipboard
                 .writeText(request.text || '')
                 .then(() => {
-                  showDecantToast(request.message || 'Decanted to clipboard!');
-                  sendResponse({ status: 'success' });
+                  if (request.message !== false) {
+                    showDecantToast(request.message || 'Decanted to clipboard!');
+                  }
+                  sendResponse({ status: 'success', success: true });
                 })
-                .catch((err) => sendResponse({ status: 'error', error: err?.message }));
+                .catch((err) =>
+                  sendResponse({ status: 'error', success: false, error: err?.message }),
+                );
             } else {
-              sendResponse({ status: 'error', error: 'Clipboard API unavailable' });
+              sendResponse({ status: 'error', success: false, error: 'Clipboard API unavailable' });
             }
             return true;
           }

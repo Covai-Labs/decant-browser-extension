@@ -3,6 +3,10 @@
     "message": "Decant - Web-zu-Markdown Clipper",
     "description": "The name of the extension"
   },
+  "extShortName": {
+    "message": "Decant",
+    "description": "The short extension name"
+  },
   "extDescription": {
     "message": "Schneller, datenschutzfreundlicher Web Clipper, der Artikel und Webseiten in sauberes Markdown umwandelt.",
     "description": "The description of the extension"
@@ -155,5 +159,21 @@
     "placeholders": {
       "1": { "content": "$1" }
     }
+  },
+  "transferCopyClipboardLabel": {
+    "message": "Prompt bei Übertragung in die Zwischenablage kopieren",
+    "description": "Label for transfer copy to clipboard checkbox"
+  },
+  "transferCopyClipboardHelp": {
+    "message": "Kopiert den übertragenen Prompt bei Aktivierung zusätzlich in die Zwischenablage, um ihn manuell einzufügen (Strg+V), falls das automatische Einfügen fehlschlägt.",
+    "description": "Help for transfer copy to clipboard checkbox"
+  },
+  "firefoxSidebarTitle": {
+    "message": "Firefox-Browser-Seitenleiste",
+    "description": "Title for Firefox sidebar section in options"
+  },
+  "firefoxSidebarDesc": {
+    "message": "Die Browser-Seitenleiste kann nativ über die Seitenleisten-Schaltfläche Ihres Browsers oder das Tastaturkürzel geöffnet oder geschlossen werden.",
+    "description": "Description for Firefox sidebar section in options"
   }
 }

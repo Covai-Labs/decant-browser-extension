@@ -6,6 +6,7 @@ const uiLanguage = document.getElementById('uiLanguage');
 const promptSaveLocation = document.getElementById('promptSaveLocation');
 const defaultAiTarget = document.getElementById('defaultAiTarget');
 const aiPromptTemplate = document.getElementById('aiPromptTemplate');
+const transferCopyToClipboard = document.getElementById('transferCopyToClipboard');
 const defaultAppTarget = document.getElementById('defaultAppTarget');
 const obsidianVault = document.getElementById('obsidianVault');
 const includeFrontmatter = document.getElementById('includeFrontmatter');
@@ -13,14 +14,29 @@ const frontmatterTemplate = document.getElementById('frontmatterTemplate');
 const headingStyle = document.getElementById('headingStyle');
 const bulletListMarker = document.getElementById('bulletListMarker');
 const codeBlockStyle = document.getElementById('codeBlockStyle');
+const firefoxSidebarSection = document.getElementById('firefox-sidebar-section');
 const saveStatus = document.getElementById('save-status');
 
 async function loadSettings() {
   const options = await getOptions();
   uiLanguage.value = options.uiLanguage || 'auto';
   if (promptSaveLocation) promptSaveLocation.checked = options.promptSaveLocation !== false;
+
+  const isFirefox =
+    (typeof navigator !== 'undefined' && navigator.userAgent.includes('Firefox')) ||
+    (typeof browser !== 'undefined' &&
+      typeof browser.runtime !== 'undefined' &&
+      Boolean(browser.runtime.getBrowserInfo));
+
+  if (isFirefox && firefoxSidebarSection) {
+    firefoxSidebarSection.classList.remove('hidden');
+  }
+
   defaultAiTarget.value = options.defaultAiTarget || 'chatgpt';
   aiPromptTemplate.value = options.aiPromptTemplate || '';
+  if (transferCopyToClipboard) {
+    transferCopyToClipboard.checked = options.transferCopyToClipboard !== false;
+  }
   defaultAppTarget.value = options.defaultAppTarget || 'obsidian';
   obsidianVault.value = options.obsidianVault || '';
   includeFrontmatter.checked = options.includeFrontmatter;
@@ -45,6 +61,7 @@ form.addEventListener('submit', async (e) => {
     promptSaveLocation: promptSaveLocation ? promptSaveLocation.checked : true,
     defaultAiTarget: defaultAiTarget.value,
     aiPromptTemplate: aiPromptTemplate.value,
+    transferCopyToClipboard: transferCopyToClipboard ? transferCopyToClipboard.checked : true,
     defaultAppTarget: defaultAppTarget.value,
     obsidianVault: obsidianVault.value,
     includeFrontmatter: includeFrontmatter.checked,
@@ -55,6 +72,7 @@ form.addEventListener('submit', async (e) => {
   };
 
   await saveOptions(options);
+
   await initI18n();
 
   saveStatus.classList.remove('hidden');

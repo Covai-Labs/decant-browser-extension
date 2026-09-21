@@ -295,3 +295,91 @@ test('injector: pollTransferInject succeeds when composer is present', async () 
   assert.equal(res.ok, true);
   assert.equal(res.attempts, 1);
 });
+
+test('attemptTransferInject: fills a contenteditable composer with multi-line payload', async () => {
+  const doc = docOf('<div data-testid="chat-input" contenteditable="true" role="textbox"></div>');
+  const multiLine = 'Here is line 1\n\nHere is line 2\nHere is line 3';
+  const res = await attemptTransferInject(okEnv(doc), {
+    payload: multiLine,
+    targetPlatform: 'claude',
+    autoSend: false,
+  });
+  assert.equal(res.ok, true);
+  assert.ok(verifyContent(doc.querySelector('[data-testid="chat-input"]'), multiLine));
+});
+
+test('injector: pollTransferInject retries on verify-failed before giving up', async () => {
+  let attemptCount = 0;
+  const doc = docOf('<textarea placeholder="Message DeepSeek"></textarea>');
+  const textarea = doc.querySelector('textarea');
+  const env = {
+    document: doc,
+    isTopFrame: true,
+  };
+
+  Object.defineProperty(textarea, 'value', {
+    get() {
+      return attemptCount >= 2 ? 'ready text' : 'wrong text';
+    },
+    set() {},
+    configurable: true,
+  });
+
+  const res = await pollTransferInject(
+    env,
+    { payload: 'ready text', targetPlatform: 'deepseek', autoSend: false },
+    {
+      maxWaitMs: 1000,
+      pollMs: 10,
+      onAttempt: () => {
+        attemptCount++;
+      },
+    },
+  );
+  assert.equal(res.ok, true);
+  assert.ok(res.attempts >= 3);
+});
+
+test('injector: pollTransferInject terminates after 4 verify-failed attempts', async () => {
+  const doc = docOf('<textarea placeholder="Message DeepSeek"></textarea>');
+  const textarea = doc.querySelector('textarea');
+  const env = { document: doc, isTopFrame: true };
+
+  Object.defineProperty(textarea, 'value', {
+    get() {
+      return 'wrong';
+    },
+    set() {},
+    configurable: true,
+  });
+
+  const res = await pollTransferInject(
+    env,
+    { payload: 'ready text', targetPlatform: 'deepseek', autoSend: false },
+    { maxWaitMs: 1000, pollMs: 10 },
+  );
+  assert.equal(res.ok, false);
+  assert.equal(res.reason, 'verify-failed');
+  assert.equal(res.attempts, 4);
+});
+
+test('options HTML and script wire transferCopyToClipboard', async () => {
+  const fs = await import('node:fs');
+  const html = fs.readFileSync('entrypoints/options/index.html', 'utf8');
+  const js = fs.readFileSync('entrypoints/options/main.js', 'utf8');
+  assert.match(html, /id="transferCopyToClipboard"/);
+  assert.match(html, /data-i18n="transferCopyClipboardLabel"/);
+  assert.match(js, /transferCopyToClipboard/);
+});
+
+test('manifest configures extShortName and short_name', async () => {
+  const fs = await import('node:fs');
+  const wxtConfig = fs.readFileSync('wxt.config.ts', 'utf8');
+  assert.match(wxtConfig, /short_name:\s*'__MSG_extShortName__'/);
+  assert.match(wxtConfig, /default_title\s*=\s*'__MSG_extShortName__'/);
+
+  const enMessages = JSON.parse(fs.readFileSync('public/_locales/en/messages.json', 'utf8'));
+  assert.equal(enMessages.extShortName.message, 'Decant');
+  assert.ok(enMessages.transferCopyClipboardLabel);
+  assert.ok(enMessages.transferCopyClipboardHelp);
+});

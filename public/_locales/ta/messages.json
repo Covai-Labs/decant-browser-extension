@@ -3,6 +3,10 @@
     "message": "Decant - வெப் டூ மார்க்டவுன் கிளிப்பர்",
     "description": "The name of the extension"
   },
+  "extShortName": {
+    "message": "Decant",
+    "description": "The short extension name"
+  },
   "extDescription": {
     "message": "கட்டுரைகள் மற்றும் வலைப்பக்கங்களை சுத்தமான மார்க்டவுனாக மாற்றும் வேகமான, தனியுரிமைக்கு முன்னுரிமை அளிக்கும் வெப் கிளிப்பர்.",
     "description": "The description of the extension"
@@ -155,5 +159,21 @@
     "placeholders": {
       "1": { "content": "$1" }
     }
+  },
+  "transferCopyClipboardLabel": {
+    "message": "இடமாற்றத்தின் போது உரையாடலை கிளிப்போர்டில் நகலெடுக்கவும்",
+    "description": "Label for transfer copy to clipboard checkbox"
+  },
+  "transferCopyClipboardHelp": {
+    "message": "செயல்படுத்தப்பட்டால், தானியங்கு உள்ளீடு தோல்வியுற்றால் நீங்கள் கைமுறையாக (Ctrl+V) ஒட்டுவதற்கு மாற்றப்பட்ட உரையாடல் கிளிப்போர்டிலும் நகலெடுக்கப்படும்.",
+    "description": "Help for transfer copy to clipboard checkbox"
+  },
+  "firefoxSidebarTitle": {
+    "message": "Firefox உலாவி பக்கப்பட்டி",
+    "description": "Title for Firefox sidebar section in options"
+  },
+  "firefoxSidebarDesc": {
+    "message": "உலாவியின் பக்கப்பட்டி நிலைமாற்றி அல்லது விசைப்பலகை குறுக்குவழியைப் பயன்படுத்தி உலாவி பக்கப்பட்டியைத் திறக்கலாம் அல்லது மூடலாம்.",
+    "description": "Description for Firefox sidebar section in options"
   }
 }

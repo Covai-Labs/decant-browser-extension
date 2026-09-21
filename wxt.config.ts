@@ -12,13 +12,15 @@ export default defineConfig({
           '48': 'icons/icon48.png',
           '128': 'icons/icon128.png',
         };
-        manifest.sidebar_action.default_title = '__MSG_extName__';
+        manifest.sidebar_action.default_title = '__MSG_extShortName__';
+        manifest.sidebar_action.open_at_install = false;
       }
     },
   },
   manifest: ({ browser }) => ({
     default_locale: 'en',
     name: '__MSG_extName__',
+    short_name: '__MSG_extShortName__',
     description: '__MSG_extDescription__',
     homepage_url: 'https://decant.covai.org/',
     permissions:
