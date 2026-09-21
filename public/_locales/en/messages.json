@@ -167,5 +167,13 @@
   "transferCopyClipboardHelp": {
     "message": "When enabled, also copies the transferred prompt to your clipboard as a backup so you can manually paste (Ctrl+V) if injection fails.",
     "description": "Help for transfer copy to clipboard checkbox"
+  },
+  "firefoxSidebarTitle": {
+    "message": "Firefox Browser Sidebar",
+    "description": "Title for Firefox sidebar section in options"
+  },
+  "firefoxSidebarDesc": {
+    "message": "The browser sidebar can be opened or closed natively using your browser's sidebar toggle or keyboard shortcut.",
+    "description": "Description for Firefox sidebar section in options"
   }
 }

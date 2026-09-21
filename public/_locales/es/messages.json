@@ -167,5 +167,13 @@
   "transferCopyClipboardHelp": {
     "message": "Cuando está activado, también copia el mensaje transferido al portapapeles como respaldo para que puedas pegarlo manualmente (Ctrl+V) si la inyección falla.",
     "description": "Help for transfer copy to clipboard checkbox"
+  },
+  "firefoxSidebarTitle": {
+    "message": "Barra lateral del navegador Firefox",
+    "description": "Title for Firefox sidebar section in options"
+  },
+  "firefoxSidebarDesc": {
+    "message": "La barra lateral del navegador se puede abrir o cerrar de forma nativa mediante el botón de la barra lateral de su navegador o el atajo de teclado.",
+    "description": "Description for Firefox sidebar section in options"
   }
 }

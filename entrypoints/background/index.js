@@ -166,6 +166,7 @@ export default defineBackground({
         const target = options.defaultAiTarget || 'chatgpt';
         const targetFrameId = typeof info.frameId === 'number' ? info.frameId : undefined;
         const sendOptions = targetFrameId !== undefined ? { frameId: targetFrameId } : undefined;
+        let effectiveSendOptions = sendOptions;
 
         let selectedText = info.selectionText ? info.selectionText.trim() : '';
 
@@ -179,6 +180,7 @@ export default defineBackground({
             );
             if (selRes && selRes.success && typeof selRes.selection === 'string') {
               selectedText = selRes.selection.trim();
+              effectiveSendOptions = sendOptions;
             }
           } catch {
             if (targetFrameId && targetFrameId !== 0) {
@@ -190,6 +192,7 @@ export default defineBackground({
                 );
                 if (topRes && topRes.success && typeof topRes.selection === 'string') {
                   selectedText = topRes.selection.trim();
+                  effectiveSendOptions = { frameId: 0 };
                 }
               } catch {
                 // Ignore
@@ -208,6 +211,7 @@ export default defineBackground({
             template: options.aiPromptTemplate,
           });
         } else {
+          effectiveSendOptions = { frameId: 0 };
           let response = await sendMessageToTab(
             tab.id,
             { action: 'EXTRACT_MARKDOWN', options },
@@ -242,7 +246,7 @@ export default defineBackground({
               await browser.tabs.sendMessage(
                 tab.id,
                 { action: 'COPY_TO_CLIPBOARD', text: payload, message: false },
-                sendOptions,
+                effectiveSendOptions,
               );
             } catch {
               // Ignore
