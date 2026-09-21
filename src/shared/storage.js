@@ -14,7 +14,6 @@ export const DEFAULT_OPTIONS = {
   promptSaveLocation: true,
   transferCopyToClipboard: true,
   uiLanguage: 'auto',
-  firefoxSidebarEnabled: false,
 };
 
 export async function getOptions() {

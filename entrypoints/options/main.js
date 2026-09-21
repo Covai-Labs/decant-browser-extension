@@ -15,7 +15,6 @@ const headingStyle = document.getElementById('headingStyle');
 const bulletListMarker = document.getElementById('bulletListMarker');
 const codeBlockStyle = document.getElementById('codeBlockStyle');
 const firefoxSidebarSection = document.getElementById('firefox-sidebar-section');
-const firefoxSidebarEnabled = document.getElementById('firefoxSidebarEnabled');
 const saveStatus = document.getElementById('save-status');
 
 async function loadSettings() {
@@ -31,9 +30,6 @@ async function loadSettings() {
 
   if (isFirefox && firefoxSidebarSection) {
     firefoxSidebarSection.classList.remove('hidden');
-  }
-  if (firefoxSidebarEnabled) {
-    firefoxSidebarEnabled.checked = Boolean(options.firefoxSidebarEnabled);
   }
 
   defaultAiTarget.value = options.defaultAiTarget || 'chatgpt';
@@ -63,7 +59,6 @@ form.addEventListener('submit', async (e) => {
   const options = {
     uiLanguage: uiLanguage.value,
     promptSaveLocation: promptSaveLocation ? promptSaveLocation.checked : true,
-    firefoxSidebarEnabled: firefoxSidebarEnabled ? firefoxSidebarEnabled.checked : false,
     defaultAiTarget: defaultAiTarget.value,
     aiPromptTemplate: aiPromptTemplate.value,
     transferCopyToClipboard: transferCopyToClipboard ? transferCopyToClipboard.checked : true,
@@ -77,21 +72,6 @@ form.addEventListener('submit', async (e) => {
   };
 
   await saveOptions(options);
-
-  if (typeof browser !== 'undefined' && browser.sidebarAction) {
-    try {
-      if (options.firefoxSidebarEnabled) {
-        await browser.sidebarAction.setPanel({ panel: 'sidepanel.html' });
-      } else {
-        await browser.sidebarAction.setPanel({ panel: '' });
-        if (typeof browser.sidebarAction.close === 'function') {
-          await browser.sidebarAction.close().catch(() => {});
-        }
-      }
-    } catch {
-      // Ignore
-    }
-  }
 
   await initI18n();
 
