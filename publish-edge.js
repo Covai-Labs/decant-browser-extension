@@ -3,7 +3,7 @@ import fs from 'fs';
 const PRODUCT_ID = process.env.EDGE_PRODUCT_ID;
 const CLIENT_ID = process.env.EDGE_CLIENT_ID;
 const API_KEY = process.env.EDGE_API_KEY;
-const ZIP_PATH = process.env.EDGE_ZIP_PATH || 'releases/decant-chrome-v1.0.0.zip';
+const ZIP_PATH = process.env.EDGE_ZIP_PATH || 'releases/decant-chromium.zip';
 
 if (!PRODUCT_ID || !CLIENT_ID || !API_KEY) {
   console.error(
