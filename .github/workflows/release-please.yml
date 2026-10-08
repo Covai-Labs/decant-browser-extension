@@ -1,11 +1,9 @@
-name: Build and Release
+name: Release Please & Publish
 
 on:
   push:
-    branches: [main]
-    tags: ['v*']
-  pull_request:
-    branches: [main]
+    branches:
+      - main
   workflow_dispatch:
     inputs:
       target:
@@ -20,16 +18,38 @@ on:
           - edge
           - none
 
+permissions:
+  contents: write
+  pull-requests: write
+
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: 'true'
 
 jobs:
-  build-and-test:
-    name: Build & Test
+  release-please:
     runs-on: ubuntu-latest
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
+    steps:
+      - uses: googleapis/release-please-action@v4
+        id: release
+        with:
+          config-file: .release-please-config.json
+          manifest-file: .release-please-manifest.json
+
+  build-and-release:
+    name: Build & Package Release
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -54,46 +74,42 @@ jobs:
           python-version: '3.x'
 
       - name: Package Extension ZIPs
-        run: npm run package
+        run: |
+          npm run package
+          cd releases
+          sha256sum *.zip > SHA256SUMS.txt
+          cat SHA256SUMS.txt
 
       - name: Upload Build Artifacts
         uses: actions/upload-artifact@v7
         with:
           name: extension-zips
-          path: releases/*.zip
-
-  github-release:
-    name: Create GitHub Release
-    needs: build-and-test
-    if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-    steps:
-      - name: Download Build Artifacts
-        uses: actions/download-artifact@v8
-        with:
-          name: extension-zips
           path: releases/
 
-      - name: Create GitHub Release
+      - name: Attach Extension ZIPs to GitHub Release
+        if: needs.release-please.outputs.release_created == 'true'
         uses: softprops/action-gh-release@v3
         with:
-          files: releases/*.zip
+          tag_name: ${{ needs.release-please.outputs.tag_name }}
+          files: |
+            releases/*.zip
+            releases/SHA256SUMS.txt
           generate_release_notes: true
-          draft: false
-          prerelease: false
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   publish-firefox:
     name: Publish to Firefox AMO
-    needs: build-and-test
+    needs: [release-please, build-and-release]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'firefox'))
+    if: |
+      needs.release-please.outputs.release_created == 'true' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'firefox'))
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -122,17 +138,19 @@ jobs:
 
   publish-chrome:
     name: Publish to Chrome Web Store
-    needs: build-and-test
+    needs: [release-please, build-and-release]
     runs-on: ubuntu-latest
-    # fetchStatus observes item-wide upload state, so serialize Chrome
-    # publish runs to avoid one run publishing another run's draft.
     concurrency:
       group: publish-chrome-store
       cancel-in-progress: false
-    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'chrome'))
+    if: |
+      needs.release-please.outputs.release_created == 'true' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'chrome'))
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
@@ -157,12 +175,16 @@ jobs:
 
   publish-edge:
     name: Publish to Microsoft Edge Add-ons
-    needs: build-and-test
+    needs: [release-please, build-and-release]
     runs-on: ubuntu-latest
-    if: startsWith(github.ref, 'refs/tags/v') || (github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'edge'))
+    if: |
+      needs.release-please.outputs.release_created == 'true' ||
+      (github.event_name == 'workflow_dispatch' && (inputs.target == 'all' || inputs.target == 'edge'))
     steps:
       - name: Checkout Code
         uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name || github.ref }}
 
       - name: Setup Node.js
         uses: actions/setup-node@v7
