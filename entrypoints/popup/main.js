@@ -389,10 +389,12 @@ if (clipAllBtn) {
     try {
       const [tab] = await browser.tabs.query({ active: true, currentWindow: true });
       const windowId = tab?.windowId || null;
+      const targetAi = aiSelect ? aiSelect.value : savedOptions.defaultAiTarget || 'chatgpt';
       await browser.runtime.sendMessage({
         action: 'BATCH_CLIP_TABS',
         mode,
         windowId,
+        targetAi,
         options: savedOptions,
       });
     } catch (err) {

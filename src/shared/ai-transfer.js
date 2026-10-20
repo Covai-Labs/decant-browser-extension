@@ -29,6 +29,25 @@ export function buildAiPrompt({ title, url, content, template }) {
   return `Please analyze and summarize the key takeaways from this web article:\n\nTitle: ${title || 'Untitled'}\nSource: ${url || ''}\n\n${content || ''}`;
 }
 
+export function buildBatchAiPrompt(results, customInstruction = '') {
+  if (!results || results.length === 0) return '';
+  const instruction =
+    customInstruction && customInstruction.trim().length > 0
+      ? customInstruction.trim()
+      : 'Please synthesize and summarize the key findings, arguments, and takeaways across the following research articles. Identify common themes, points of consensus, and any conflicting viewpoints:';
+
+  const formattedArticles = results
+    .map((item, index) => {
+      const title = item.title || `Article ${index + 1}`;
+      const url = item.url ? `Source: ${item.url}\n` : '';
+      const text = item.markdown || item.content || '';
+      return `### Article ${index + 1}: ${title}\n${url}\n${text}`;
+    })
+    .join('\n\n---\n\n');
+
+  return `${instruction}\n\n---\n\n${formattedArticles}`;
+}
+
 export function getAiPlatformUrl(target = 'chatgpt') {
   return AI_PLATFORMS[target]?.url || AI_PLATFORMS.chatgpt.url;
 }

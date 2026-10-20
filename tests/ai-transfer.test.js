@@ -77,3 +77,24 @@ test('TRANSFER_TARGETS contains 12 platforms', async () => {
   assert.equal(grok.label, 'Grok');
   assert.equal(grok.url, 'https://grok.com/');
 });
+
+test('buildBatchAiPrompt aggregates articles and formats instructions', async () => {
+  const { buildBatchAiPrompt } = await import('../src/shared/ai-transfer.js');
+  const articles = [
+    { title: 'Article 1', url: 'https://example.com/1', markdown: 'First point.' },
+    { title: 'Article 2', url: 'https://example.com/2', markdown: 'Second point.' },
+  ];
+
+  const prompt = buildBatchAiPrompt(articles);
+  assert.match(prompt, /Please synthesize and summarize the key findings/);
+  assert.match(prompt, /### Article 1: Article 1/);
+  assert.match(prompt, /Source: https:\/\/example\.com\/1/);
+  assert.match(prompt, /First point\./);
+  assert.match(prompt, /### Article 2: Article 2/);
+  assert.match(prompt, /Second point\./);
+
+  const customPrompt = buildBatchAiPrompt(articles, 'Custom instruction here');
+  assert.match(customPrompt, /^Custom instruction here/);
+  assert.equal(buildBatchAiPrompt([]), '');
+  assert.equal(buildBatchAiPrompt(null), '');
+});
