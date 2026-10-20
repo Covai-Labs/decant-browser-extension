@@ -289,14 +289,14 @@ export default defineBackground({
             },
           );
 
-          const promptInstruction = customPrompt || options.aiPromptTemplate || '';
-          const aiPayload = buildBatchAiPrompt(results, promptInstruction);
+          const aiPayload = buildBatchAiPrompt(results, customPrompt);
           const effectiveTarget = targetAi || options.defaultAiTarget || 'chatgpt';
+          const autoSend = options.transferAutoSend !== false;
           await performTransfer(
             effectiveTarget,
             aiPayload,
             `Batch Tabs Synthesis (${results.length} tabs)`,
-            true,
+            autoSend,
           );
 
           const result = {
