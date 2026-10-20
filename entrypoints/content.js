@@ -1,7 +1,6 @@
 import { defineContentScript } from 'wxt/utils/define-content-script';
 import {
   detectPlatform,
-  parsers,
   isAiChatUrl,
   extractArticleIntelligent,
   convertToMarkdown,
@@ -19,16 +18,10 @@ import { logger } from '../src/shared/logger.js';
 
 async function extractAiChat(options = DEFAULT_OPTIONS) {
   if (!isAiChatUrl(window.location.href)) return null;
-  const platform = detectPlatform(window.location.href);
-  if (!platform) return null;
-
-  const ParserClass = parsers.find((p) => p.platform === platform);
-  if (!ParserClass) return null;
+  const parser = detectPlatform(window.location.href);
+  if (!parser || !parser.isAvailable(window.location.href)) return null;
 
   try {
-    const parser = new ParserClass();
-    if (!parser.canParse(window.location.href)) return null;
-
     const result = await parser.parse();
     if (!result) return null;
 
@@ -54,11 +47,11 @@ async function extractAiChat(options = DEFAULT_OPTIONS) {
       .join('\n<hr/>\n');
 
     const parsedArticle = {
-      title: result.title || `${platform} Chat`,
+      title: result.title || `${parser.platform} Chat`,
       byline: '',
       dir: '',
       excerpt: '',
-      siteName: platform,
+      siteName: parser.platform,
       publishedTime: '',
       url: window.location.href,
       content: mdBody,
