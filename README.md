@@ -6,11 +6,18 @@
 
 _Decant articles and web content into clean, structured Markdown, Word, HTML, and JSON with local extraction and zero telemetry._
 
+[![Website](https://img.shields.io/badge/Website-decant.covai.org-blueviolet)](https://decant.covai.org/)
 [![License: AGPL-3.0](https://img.shields.io/badge/License-AGPL--3.0-red.svg)](LICENSE)
 [![GitHub](https://img.shields.io/github/stars/Covai-Labs/decant-browser-extension?logo=github&logoColor=white&color=yellow&label=Stars)](https://github.com/Covai-Labs/decant-browser-extension)
 [![Made with WXT](https://img.shields.io/badge/WXT-0.21-ff90e8)](https://wxt.dev)
 
-[Quick Install](#quick-install) • [Features](#key-features) • [Privacy](#privacy) • [Development](#development) • [Contributing](#contributing)
+[![Chrome Web Store](https://img.shields.io/chrome-web-store/v/gaedmbipeogpcddnoedpmjcemgcoboaa?logo=google-chrome&logoColor=white&label=Chrome%20Web%20Store&color=blue)](https://chromewebstore.google.com/detail/decant-web-to-markdown-cl/gaedmbipeogpcddnoedpmjcemgcoboaa)
+[![Firefox Add-ons](https://img.shields.io/amo/v/decant?logo=firefox-browser&logoColor=white&label=Firefox%20Add-ons&color=orange)](https://addons.mozilla.org/en-US/firefox/addon/decant/)
+
+[![Chrome Users](https://img.shields.io/chrome-web-store/users/gaedmbipeogpcddnoedpmjcemgcoboaa?logo=google-chrome&logoColor=white&label=Chrome%20Users&color=blue)](https://chromewebstore.google.com/detail/decant-web-to-markdown-cl/gaedmbipeogpcddnoedpmjcemgcoboaa)
+[![Firefox Users](https://img.shields.io/amo/users/decant?logo=firefox-browser&logoColor=white&label=Firefox%20Users&color=orange)](https://addons.mozilla.org/en-US/firefox/addon/decant/)
+
+[Quick Install](#quick-install) • [Features](#key-features) • [Privacy & Permissions](#privacy--permissions) • [Development](#development) • [Contributing](#contributing)
 
 ---
 
@@ -44,7 +51,7 @@ Key differentiators:
 - ⚡ **Side Panel & Shortcuts:** Clip, copy, and preview from the native Chromium side panel, plus keyboard shortcuts — `Alt+Shift+C` copy, `Alt+Shift+D` download, `Alt+Shift+A` batch clip.
 - 🖱️ **Right-click menus:** Decant the page or text selection from the context menu, or send directly to your default AI platform.
 - 🎨 **Custom Frontmatter & Formatting:** Configurable templates for metadata tags, page URLs, titles, and dates.
-- 🔒 **100% Private & Local:** All parsing happens on-device in your browser. Zero tracking or telemetry. See [Privacy](#privacy).
+- 🔒 **100% Private & Local:** All parsing happens on-device in your browser. Zero tracking or telemetry. See [Privacy](#privacy--permissions).
 
 ---
 
@@ -67,19 +74,25 @@ Key differentiators:
 
 ---
 
-## Privacy
+## Privacy & Permissions
 
 Decant keeps extraction and conversion local by design. Explicitly handing content off to an AI service shares it with the configured third-party provider.
 
-| Permission                | Why it's needed                                                            |
-| :------------------------ | :------------------------------------------------------------------------- |
-| `activeTab` / `scripting` | Inject the content script to extract the page only when you trigger a clip |
-| `storage`                 | Save your local preferences (frontmatter template, format, app target)     |
-| `downloads`               | Save `.md` files directly to your device                                   |
-| `clipboardWrite`          | Copy Markdown to your clipboard                                            |
-| `contextMenus`            | Add right-click "Decant to Markdown" menu items                            |
+**Zero Remote Processing:** All DOM extraction, markdown generation, LaTeX parsing, and article rendering occur entirely inside your local browser. Zero analytics, zero telemetry.
 
-Decant has no analytics or telemetry endpoints. Extraction remains on-device; content is sent off-device only when you explicitly transfer it to a configured third-party AI provider or another external destination. Audit it yourself: [PRIVACY.md](PRIVACY.md) and the full [source](https://github.com/Covai-Labs/decant-browser-extension).
+| Permission                        | Why it's needed                                                                                             |
+| :-------------------------------- | :---------------------------------------------------------------------------------------------------------- |
+| `activeTab` / `scripting`         | Inject content scripts to extract the page only when you trigger a clip                                     |
+| `tabs`                            | Enumerate and coordinate open tabs for the Multi-Tab Batch Clipper (`Alt+Shift+A`) and research aggregation |
+| `host_permissions` (`<all_urls>`) | Read and decant articles from arbitrary web pages and embedded frames across any domain                     |
+| `storage`                         | Save your local preferences (frontmatter template, format, PKM/AI target)                                   |
+| `downloads`                       | Save `.md`, `.html`, `.doc`, `.json`, and `.zip` archives directly to your device                           |
+| `clipboardWrite`                  | Copy Markdown directly to your clipboard                                                                    |
+| `contextMenus`                    | Provide right-click "Decant to Markdown" and "Send to AI" menu options                                      |
+| `sidePanel`                       | Power the persistent Chromium side panel reader and preview interface                                       |
+| `alarms`                          | Clean up temporary inter-tab transfer records                                                               |
+
+Decant has zero analytics endpoints. Extraction remains strictly on-device; content is sent off-device only when you explicitly trigger an AI hand-off or external PKM deep-link. Audit it yourself: [PRIVACY.md](PRIVACY.md) and [`wxt.config.ts`](wxt.config.ts).
 
 ---
 

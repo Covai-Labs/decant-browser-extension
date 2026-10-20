@@ -222,14 +222,13 @@ async function sendMessageToTab(tabId, message, maxRetries = 2, retryDelay = 100
 }
 
 /**
- * Clips all valid tabs in a browser window with concurrency throttling and download triggering.
+ * Extracts markdown content from all valid tabs in a window without downloading.
  * @param {Object} options Decant clipping options
- * @param {'zip' | 'combined' | 'separate'} [mode='zip'] Export mode
- * @param {number|null} [windowId=null] Target window ID (defaults to current window)
+ * @param {number|null} [windowId=null] Target window ID
  * @param {Function|null} [onProgress=null] Callback (processed, total, currentTabTitle)
- * @returns {Promise<{ total: number, extracted: number, failed: number }>}
+ * @returns {Promise<{ validTabs: any[], results: Array<{ title: string, markdown: string, url?: string, filename?: string }> }>}
  */
-export async function clipAllTabs(options = {}, mode = 'zip', windowId = null, onProgress = null) {
+export async function extractAllTabsData(options = {}, windowId = null, onProgress = null) {
   const queryInfo = windowId ? { windowId } : { currentWindow: true };
   const tabs = await browser.tabs.query(queryInfo);
   const validTabs = tabs.filter(isExtractableTab);
@@ -237,11 +236,6 @@ export async function clipAllTabs(options = {}, mode = 'zip', windowId = null, o
   if (validTabs.length === 0) {
     throw new Error('No extractable web pages found in this window.');
   }
-
-  logger.info(
-    'BatchClipper',
-    `Found ${validTabs.length} extractable tabs out of ${tabs.length} total. Mode: ${mode}`,
-  );
 
   const concurrencyLimit = 4;
   const results = [];
@@ -252,7 +246,6 @@ export async function clipAllTabs(options = {}, mode = 'zip', windowId = null, o
       let res = await sendMessageToTab(tab.id, { action: 'EXTRACT_MARKDOWN', options }, 2, 120);
 
       if (!res) {
-        // Dynamically inject content script if not already responding
         try {
           await browser.scripting.executeScript({
             target: { tabId: tab.id },
@@ -277,7 +270,6 @@ export async function clipAllTabs(options = {}, mode = 'zip', windowId = null, o
     }
   }
 
-  // Process in chunks of concurrencyLimit
   for (let i = 0; i < validTabs.length; i += concurrencyLimit) {
     const chunk = validTabs.slice(i, i + concurrencyLimit);
     await Promise.all(chunk.map((t) => processTab(t)));
@@ -286,6 +278,21 @@ export async function clipAllTabs(options = {}, mode = 'zip', windowId = null, o
   if (results.length === 0) {
     throw new Error('Could not extract markdown from any open tabs.');
   }
+
+  return { validTabs, results };
+}
+
+/**
+ * Clips all valid tabs in a browser window with concurrency throttling and download triggering.
+ * @param {Object} options Decant clipping options
+ * @param {'zip' | 'combined' | 'separate'} [mode='zip'] Export mode
+ * @param {number|null} [windowId=null] Target window ID (defaults to current window)
+ * @param {Function|null} [onProgress=null] Callback (processed, total, currentTabTitle)
+ * @returns {Promise<{ total: number, extracted: number, failed: number, results?: any[] }>}
+ */
+export async function clipAllTabs(options = {}, mode = 'zip', windowId = null, onProgress = null) {
+  logger.info('BatchClipper', `Starting tab extraction. Mode: ${mode}`);
+  const { validTabs, results } = await extractAllTabsData(options, windowId, onProgress);
 
   const timestamp = new Date().toISOString().split('T')[0];
   const shouldSaveAs = options.promptSaveLocation !== false;

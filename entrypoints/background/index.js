@@ -5,6 +5,7 @@ import {
   getAiPlatformUrl,
   getTransferTarget,
   buildAiPrompt,
+  buildBatchAiPrompt,
 } from '../../src/shared/ai-transfer.js';
 import {
   MAX_CHUNKS,
@@ -15,7 +16,7 @@ import {
 } from '../../src/shared/transfer/records.js';
 import { logger } from '../../src/shared/logger.js';
 import { getMessage } from '../../src/shared/i18n.js';
-import { clipAllTabs, downloadFile } from '../../src/shared/batch-clipper.js';
+import { clipAllTabs, extractAllTabsData, downloadFile } from '../../src/shared/batch-clipper.js';
 
 const UNINSTALL_URL = 'https://decant.covai.org/uninstall-feedback.html';
 const WELCOME_URL = 'https://decant.covai.org/welcome.html';
@@ -259,12 +260,60 @@ export default defineBackground({
       }
     }
 
-    async function handleBatchClip(windowId, options, mode = 'zip') {
+    async function handleBatchClip(
+      windowId,
+      options,
+      mode = 'zip',
+      targetAi = null,
+      customPrompt = '',
+    ) {
       try {
         logger.info(
           'Background',
           `Starting batch tab clipping for window: ${windowId}, mode: ${mode}`,
         );
+
+        if (mode === 'ai') {
+          const { validTabs, results } = await extractAllTabsData(
+            options,
+            windowId,
+            (processed, total, title) => {
+              browser.runtime
+                .sendMessage({
+                  action: 'BATCH_PROGRESS',
+                  processed,
+                  total,
+                  title,
+                })
+                .catch(() => {});
+            },
+          );
+
+          const aiPayload = buildBatchAiPrompt(results, customPrompt);
+          const effectiveTarget = targetAi || options.defaultAiTarget || 'chatgpt';
+          const autoSend = options.transferAutoSend !== false;
+          await performTransfer(
+            effectiveTarget,
+            aiPayload,
+            `Batch Tabs Synthesis (${results.length} tabs)`,
+            autoSend,
+          );
+
+          const result = {
+            total: validTabs.length,
+            extracted: results.length,
+            failed: validTabs.length - results.length,
+          };
+
+          browser.runtime
+            .sendMessage({
+              action: 'BATCH_COMPLETE',
+              result,
+            })
+            .catch(() => {});
+          return;
+        }
+
         const result = await clipAllTabs(options, mode, windowId, (processed, total, title) => {
           browser.runtime
             .sendMessage({
@@ -366,6 +415,13 @@ export default defineBackground({
 
     async function performTransfer(target, payload, title = 'Decanted Article', autoSend = true) {
       const uriAppTargets = ['obsidian', 'logseq', 'bear', 'noteplan', 'drafts'];
+      if (!uriAppTargets.includes(target)) {
+        const chunks = splitPayload(payload);
+        if (chunks.length > MAX_CHUNKS) {
+          throw new Error('Transfer payload is too large.');
+        }
+      }
+
       if (uriAppTargets.includes(target)) {
         const syncData = await browser.storage.sync.get('obsidianVault');
         const vault = syncData.obsidianVault || '';
@@ -420,9 +476,6 @@ export default defineBackground({
 
       if (newTab && newTab.id !== undefined) {
         const chunks = splitPayload(payload);
-        if (chunks.length > MAX_CHUNKS) {
-          throw new Error('Transfer payload is too large.');
-        }
         const key = transferKey(newTab.id);
         const entries = {};
         if (chunks.length > 1) {
@@ -494,7 +547,9 @@ export default defineBackground({
             const options = request.options || (await getOptions());
             const mode = request.mode || 'zip';
             const windowId = request.windowId || null;
-            await handleBatchClip(windowId, options, mode);
+            const targetAi = request.targetAi || null;
+            const customPrompt = request.customPrompt || '';
+            await handleBatchClip(windowId, options, mode, targetAi, customPrompt);
             sendResponse({ success: true });
           } catch (e) {
             logger.error('Background', 'Batch clipping error:', e);
