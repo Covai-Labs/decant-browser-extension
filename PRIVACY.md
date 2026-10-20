@@ -4,11 +4,11 @@
 
 ## 1. 100% On-Device & Client-Side Operation
 
-**Decant** is built with a strict privacy-first architecture. All DOM extraction, article parsing (via Mozilla Readability), and Markdown conversion happen 100% locally inside your browser context. No content ever leaves your device.
+**Decant** is built with a strict privacy-first architecture. All DOM extraction, article parsing (via Mozilla Readability), and Markdown conversion happen 100% locally inside your browser context. Content leaves your device only when you explicitly hand it off to a configured third-party AI provider or external PKM application.
 
 ## 2. Zero Data Collection & Zero Telemetry
 
-Decant does **NOT** collect, store, transmit, or monetize any user data, browsing history, clipped articles, or settings. There are no tracking scripts, telemetry endpoints, or analytics services embedded in the extension.
+Decant does **NOT** collect, store, or monetize any user data, browsing history, clipped articles, or settings. It transmits content only when you explicitly initiate an AI or PKM hand-off. There are no tracking scripts, telemetry endpoints, or analytics services embedded in the extension.
 
 ## 3. Permissions Overview
 

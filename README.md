@@ -51,7 +51,7 @@ Key differentiators:
 - ⚡ **Side Panel & Shortcuts:** Clip, copy, and preview from the native Chromium side panel, plus keyboard shortcuts — `Alt+Shift+C` copy, `Alt+Shift+D` download, `Alt+Shift+A` batch clip.
 - 🖱️ **Right-click menus:** Decant the page or text selection from the context menu, or send directly to your default AI platform.
 - 🎨 **Custom Frontmatter & Formatting:** Configurable templates for metadata tags, page URLs, titles, and dates.
-- 🔒 **100% Private & Local:** All parsing happens on-device in your browser. Zero tracking or telemetry. See [Privacy](#privacy).
+- 🔒 **100% Private & Local:** All parsing happens on-device in your browser. Zero tracking or telemetry. See [Privacy](#privacy--permissions).
 
 ---
 

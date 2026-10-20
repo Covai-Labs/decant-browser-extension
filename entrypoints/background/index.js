@@ -289,7 +289,8 @@ export default defineBackground({
             },
           );
 
-          const aiPayload = buildBatchAiPrompt(results, customPrompt);
+          const promptInstruction = customPrompt || options.aiPromptTemplate || '';
+          const aiPayload = buildBatchAiPrompt(results, promptInstruction);
           const effectiveTarget = targetAi || options.defaultAiTarget || 'chatgpt';
           await performTransfer(
             effectiveTarget,
@@ -414,6 +415,13 @@ export default defineBackground({
 
     async function performTransfer(target, payload, title = 'Decanted Article', autoSend = true) {
       const uriAppTargets = ['obsidian', 'logseq', 'bear', 'noteplan', 'drafts'];
+      if (!uriAppTargets.includes(target)) {
+        const chunks = splitPayload(payload);
+        if (chunks.length > MAX_CHUNKS) {
+          throw new Error('Transfer payload is too large.');
+        }
+      }
+
       if (uriAppTargets.includes(target)) {
         const syncData = await browser.storage.sync.get('obsidianVault');
         const vault = syncData.obsidianVault || '';
@@ -468,9 +476,6 @@ export default defineBackground({
 
       if (newTab && newTab.id !== undefined) {
         const chunks = splitPayload(payload);
-        if (chunks.length > MAX_CHUNKS) {
-          throw new Error('Transfer payload is too large.');
-        }
         const key = transferKey(newTab.id);
         const entries = {};
         if (chunks.length > 1) {

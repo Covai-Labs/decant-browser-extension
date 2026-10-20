@@ -87,10 +87,11 @@ test('buildBatchAiPrompt aggregates articles and formats instructions', async ()
 
   const prompt = buildBatchAiPrompt(articles);
   assert.match(prompt, /Please synthesize and summarize the key findings/);
-  assert.match(prompt, /### Article 1: Article 1/);
-  assert.match(prompt, /Source: https:\/\/example\.com\/1/);
+  assert.match(prompt, /<article index="1">/);
+  assert.match(prompt, /<title>Article 1<\/title>/);
+  assert.match(prompt, /<source>https:\/\/example\.com\/1<\/source>/);
   assert.match(prompt, /First point\./);
-  assert.match(prompt, /### Article 2: Article 2/);
+  assert.match(prompt, /<article index="2">/);
   assert.match(prompt, /Second point\./);
 
   const customPrompt = buildBatchAiPrompt(articles, 'Custom instruction here');
